@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+  <title id="title">Hoza Closed Orbit mark</title>
+  <desc id="desc">A circular portal with a violet signal at its center.</desc>
+  <path fill="#F5F2FA" fill-rule="evenodd" d="M100 24a76 76 0 1 1 0 152 76 76 0 0 1 0-152Zm0 34a42 42 0 1 0 0 84 42 42 0 0 0 0-84Z"/>
+  <circle cx="100" cy="100" r="10" fill="#8B5CFF"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Hoza Forward Portal mark</title>
+  <desc id="desc">A violet circular portal with a centered signal dot and a restrained forward-cut opening.</desc>
+  <defs>
+    <mask id="portal-cut" maskUnits="userSpaceOnUse">
+      <rect width="128" height="128" fill="#000"/>
+      <circle cx="64" cy="64" r="52" fill="#fff"/>
+      <circle cx="64" cy="64" r="29" fill="#000"/>
+      <path d="M91 60 128 54V68L91 70Z" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="128" height="128" fill="#8B5CFF" mask="url(#portal-cut)"/>
+  <circle cx="64" cy="64" r="7" fill="#C8B7FF"/>
+</svg>

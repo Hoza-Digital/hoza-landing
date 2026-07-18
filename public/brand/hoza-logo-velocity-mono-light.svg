@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 200" role="img" aria-label="Hoza">
+  <defs>
+    <mask id="hoza-velocity-mono" maskUnits="userSpaceOnUse">
+      <rect width="680" height="200" fill="#000"/>
+      <path d="M30 42H60V86H116V42H146V158H116V114H60V158H30Z" fill="#fff"/>
+      <path d="M194 42H272L302 72V128L272 158H194L164 128V72L194 42Z" fill="#fff"/>
+      <path d="M207 72H259L272 85V115L259 128H207L194 115V85L207 72Z" fill="#000"/>
+      <path d="M326 42H470V70L381 130H470V158H326V130L415 70H326ZM548 42H586L650 158H614L600 132H534L520 158H484L548 42Z" fill="#fff"/>
+      <path d="M567 72L588 112H546L567 72Z" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="680" height="200" fill="#F5F2FA" mask="url(#hoza-velocity-mono)"/>
+  <circle cx="233" cy="100" r="8" fill="#F5F2FA"/>
+</svg>

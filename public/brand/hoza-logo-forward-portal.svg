@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" role="img" aria-labelledby="title desc">
+  <title id="title">Hoza Forward Portal logo</title>
+  <desc id="desc">A violet portal mark with a centered signal dot and forward-cut opening, followed by the Hoza wordmark.</desc>
+  <defs>
+    <mask id="portal-cut" maskUnits="userSpaceOnUse">
+      <rect width="180" height="200" fill="#000"/>
+      <circle cx="90" cy="100" r="60" fill="#fff"/>
+      <circle cx="90" cy="100" r="33" fill="#000"/>
+      <path d="M120 96 158 90V103L120 105Z" fill="#000"/>
+    </mask>
+  </defs>
+
+  <rect width="180" height="200" fill="#8B5CFF" mask="url(#portal-cut)"/>
+  <circle cx="90" cy="100" r="8" fill="#C8B7FF"/>
+
+  <g fill="#F5F2FA">
+    <path d="M190 45H213V88H253V45H276V155H253V112H213V155H190Z"/>
+    <path fill-rule="evenodd" d="M330 45H382C400 45 412 58 412 76V124C412 142 400 155 382 155H330C312 155 300 142 300 124V76C300 58 312 45 330 45ZM337 70H375C383 70 388 77 388 85V115C388 123 383 130 375 130H337C329 130 324 123 324 115V85C324 77 329 70 337 70Z"/>
+    <path d="M436 45H542V67L480 132H542V155H436V133L498 68H436Z"/>
+    <path fill-rule="evenodd" d="M616 45H646L696 155H668L657 130H605L594 155H566L616 45ZM631 70 615 107H647L631 70Z"/>
+  </g>
+</svg>

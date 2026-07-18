@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 200" role="img" aria-labelledby="title desc">
+  <title id="title">Hoza Connected H logo</title>
+  <desc id="desc">The first letter of the Hoza wordmark is a violet H built from two pillars joined by a forward-angled bridge and signal node.</desc>
+
+  <g fill="#8B5CFF">
+    <path d="M30 45H58V88L132 67V45H160V155H132V94L58 115V155H30Z"/>
+  </g>
+  <circle cx="95" cy="91.5" r="8" fill="#C8B7FF"/>
+
+  <g fill="#F5F2FA">
+    <path fill-rule="evenodd" d="M225 45H277C295 45 307 58 307 76V124C307 142 295 155 277 155H225C207 155 195 142 195 124V76C195 58 207 45 225 45ZM232 70H270C278 70 283 77 283 85V115C283 123 278 130 270 130H232C224 130 219 123 219 115V85C219 77 224 70 232 70Z"/>
+    <path d="M331 45H437V67L375 132H437V155H331V133L393 68H331Z"/>
+    <path fill-rule="evenodd" d="M511 45H541L591 155H563L552 130H500L489 155H461L511 45ZM526 70 510 107H542L526 70Z"/>
+  </g>
+</svg>
