@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+  <title id="title">Hoza Velocity mark</title>
+  <desc id="desc">A chamfered portal with a violet signal at its center.</desc>
+  <path fill="#F5F2FA" fill-rule="evenodd" d="M54 24h92l30 30v92l-30 30H54l-30-30V54l30-30Zm18 34-14 14v56l14 14h56l14-14V72l-14-14H72Z"/>
+  <circle cx="100" cy="100" r="10" fill="#8B5CFF"/>
+</svg>

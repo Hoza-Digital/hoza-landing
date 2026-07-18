@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" role="img" aria-labelledby="title desc">
+  <title id="title">Hoza Closed Orbit logo</title>
+  <desc id="desc">A custom Hoza wordmark with an integrated circular portal O and violet signal at its center.</desc>
+  <defs>
+    <mask id="hoza-closed-orbit" maskUnits="userSpaceOnUse">
+      <rect width="600" height="200" fill="#000"/>
+      <path d="M28 38H62V84H116V38H150V162H116V116H62V162H28Z" fill="#fff"/>
+      <circle cx="154" cy="100" r="62" fill="#fff"/>
+      <circle cx="154" cy="100" r="35" fill="#000"/>
+      <path d="M234 38H386V68L287 132H386V162H234V132L333 68H234ZM466 38H505L566 162H528L514 131H456L442 162H404L466 38Z" fill="#fff"/>
+      <path d="M485 69L501 105H469Z" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="600" height="200" fill="#F5F2FA" mask="url(#hoza-closed-orbit)"/>
+  <circle cx="154" cy="100" r="8" fill="#8B5CFF"/>
+</svg>

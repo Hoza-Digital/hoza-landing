@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Hoza Connected H mark</title>
+  <desc id="desc">A geometric H formed by two violet pillars, a forward-angled bridge, and a centered signal node.</desc>
+  <path fill="#8B5CFF" d="M20 16H44V60L84 48V16H108V112H84V72L44 84V112H20Z"/>
+  <circle cx="64" cy="66" r="7" fill="#C8B7FF"/>
+</svg>
