@@ -215,7 +215,7 @@ body.menu-open .site-nav {
 html.portal-active main, html.portal-active footer { transform: scale(.988); filter: blur(2px); transition: transform .3s, filter .3s; }
 
 /* Cursor */
-.cursor-dot { --pointer-x: 50vw; --pointer-y: 50vh; --pointer-scale: 1; position: fixed; z-index: 500; left: -18px; top: -18px; width: 36px; height: 36px; border: 1px solid color-mix(in oklch, var(--lavender) 65%, transparent); border-radius: 50%; pointer-events: none; display: grid; place-items: center; transform: translate3d(var(--pointer-x), var(--pointer-y), 0) scale(var(--pointer-scale)); transition: border-color .22s, background .22s, opacity .22s; }
+.cursor-dot { --pointer-x: 50vw; --pointer-y: 50vh; --pointer-scale: 1; position: fixed; z-index: 1100; left: -18px; top: -18px; width: 36px; height: 36px; border: 1px solid color-mix(in oklch, var(--lavender) 65%, transparent); border-radius: 50%; pointer-events: none; display: grid; place-items: center; transform: translate3d(var(--pointer-x), var(--pointer-y), 0) scale(var(--pointer-scale)); transition: border-color .22s, background .22s, opacity .22s; }
 .cursor-dot span { width: 3px; height: 3px; border-radius: 50%; background: var(--lavender); }
 .cursor-dot.is-active { --pointer-scale: 1.35; border-color: var(--violet); background: var(--accent-wash); }
 .custom-cursor-enabled, .custom-cursor-enabled a, .custom-cursor-enabled button { cursor: none !important; }
