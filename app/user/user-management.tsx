@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import Image from "next/image";
+import { useActionState, useRef, useState, type ChangeEvent } from "react";
 import {
   ArrowUpRight,
+  Camera,
   Check,
   KeyRound,
   LoaderCircle,
@@ -10,6 +12,7 @@ import {
   ShieldCheck,
   Trash2,
   UserPlus,
+  X,
 } from "lucide-react";
 import {
   ADMIN_ROLE_LABELS,
@@ -21,6 +24,7 @@ import {
   deleteUser,
   type CreateUserState,
 } from "./actions";
+import { formatAvatarBytes, processUserAvatar } from "./avatar-processing";
 
 const initialState: CreateUserState = { status: "idle", message: "" };
 
@@ -29,6 +33,7 @@ export type UserManagementRecord = {
   name: string;
   email: string;
   role: AdminRole;
+  avatarUrl: string | null;
   createdAt: string;
   canChangeRole: boolean;
   canDelete: boolean;
@@ -55,6 +60,46 @@ function formatDate(value: string) {
 
 export function UserManagement({ users, creatableRoleOptions }: UserManagementProps) {
   const [state, formAction, pending] = useActionState(createUser, initialState);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [avatar, setAvatar] = useState({
+    status: "idle" as "idle" | "processing" | "ready" | "error",
+    dataUrl: "",
+    fileName: "",
+    message: "Optional · JPG, PNG or WebP · automatically cropped and optimized",
+  });
+
+  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setAvatar((current) => ({ ...current, status: "processing", message: "Preparing profile photo…" }));
+    try {
+      const processed = await processUserAvatar(file);
+      setAvatar({
+        status: "ready",
+        dataUrl: processed.dataUrl,
+        fileName: processed.fileName,
+        message: `${formatAvatarBytes(processed.sizeBytes)} WebP · ready to save`,
+      });
+    } catch (error) {
+      setAvatar({
+        status: "error",
+        dataUrl: "",
+        fileName: "",
+        message: error instanceof Error ? error.message : "The profile photo could not be prepared.",
+      });
+    }
+  };
+
+  const removeAvatar = () => {
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+    setAvatar({
+      status: "idle",
+      dataUrl: "",
+      fileName: "",
+      message: "Optional · JPG, PNG or WebP · automatically cropped and optimized",
+    });
+  };
 
   return (
     <div className="user-management-grid">
@@ -111,7 +156,42 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
             </select>
           </label>
 
-          <button type="submit" className="user-create-button" disabled={pending}>
+          <div className="user-photo-field">
+            <span>Profile photo <em>Optional</em></span>
+            <div className={`user-photo-picker is-${avatar.status}`}>
+              <div className="user-photo-preview" aria-hidden={!avatar.dataUrl}>
+                {avatar.dataUrl ? (
+                  <Image src={avatar.dataUrl} alt="Selected profile" width={64} height={64} unoptimized />
+                ) : (
+                  <Camera aria-hidden="true" />
+                )}
+              </div>
+              <div>
+                <label htmlFor="new-user-avatar" className="user-photo-select">
+                  {avatar.status === "processing" ? <LoaderCircle className="admin-spin" aria-hidden="true" /> : <Camera aria-hidden="true" />}
+                  {avatar.dataUrl ? "Change photo" : "Choose photo"}
+                </label>
+                <input
+                  ref={avatarInputRef}
+                  id="new-user-avatar"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) => void handleAvatarChange(event)}
+                  disabled={avatar.status === "processing" || pending}
+                />
+                {avatar.dataUrl && (
+                  <button type="button" className="user-photo-remove" onClick={removeAvatar}>
+                    <X aria-hidden="true" /> Remove
+                  </button>
+                )}
+                <small role="status" aria-live="polite">{avatar.message}</small>
+              </div>
+            </div>
+            <input type="hidden" name="avatarData" value={avatar.dataUrl} />
+            <input type="hidden" name="avatarFileName" value={avatar.fileName} />
+          </div>
+
+          <button type="submit" className="user-create-button" disabled={pending || avatar.status === "processing"}>
             {pending ? <LoaderCircle className="admin-spin" aria-hidden="true" /> : <ArrowUpRight aria-hidden="true" />}
             {pending ? "Creating user…" : "Create user"}
           </button>
@@ -137,7 +217,11 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
         <div className="user-directory-list">
           {users.map((user) => (
             <article key={user.id}>
-              <div className="user-avatar" aria-hidden="true">{initials(user.name)}</div>
+              <div className={`user-avatar${user.avatarUrl ? " has-photo" : ""}`} aria-hidden="true">
+                {user.avatarUrl ? (
+                  <Image src={user.avatarUrl} alt="" width={52} height={52} unoptimized />
+                ) : initials(user.name)}
+              </div>
               <div className="user-identity">
                 <span>{ADMIN_ROLE_LABELS[user.role]}</span>
                 <h3>{user.name}</h3>

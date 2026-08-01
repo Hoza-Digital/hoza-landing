@@ -18,6 +18,11 @@ function maskEmail(email: string) {
   return `${email.slice(0, 3)}************`;
 }
 
+function avatarUrl(storagePath: string | null) {
+  const match = /^(\d{6})\/([a-z0-9]+(?:-[a-z0-9]+)*)\.webp$/.exec(storagePath ?? "");
+  return match ? `/image/${match[1]}/${match[2]}` : null;
+}
+
 function roleOptions(actorRole: AdminRole, targetRole: AdminRole): AdminRole[] {
   if (!canChangeManagedRole(actorRole, targetRole)) return [];
   if (actorRole === "super_admin") return [...ADMIN_ROLES];
@@ -35,6 +40,7 @@ export default async function UserManagementPage() {
     name: user.name,
     email: canSeeFullEmail ? user.email : maskEmail(user.email),
     role: user.role,
+    avatarUrl: avatarUrl(user.avatarPath),
     createdAt: user.createdAt,
     canChangeRole: canChangeManagedRole(admin.role, user.role),
     canDelete: canDeleteManagedUser(admin.role, user.role),

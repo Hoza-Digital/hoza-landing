@@ -19,6 +19,7 @@ export type AdminIdentity = {
 };
 
 export type ManagedAdminUser = AdminIdentity & {
+  avatarPath: string | null;
   active: boolean;
   createdAt: string;
 };
@@ -28,6 +29,7 @@ type AdminUserRow = {
   name: string;
   email: string;
   role: AdminRole;
+  avatar_path?: string | null;
   password_hash: string;
   active: boolean;
   created_at?: string;
@@ -133,6 +135,7 @@ export async function listManagedAdminUsers(
 
   return visibleRows.map((row) => ({
     ...toIdentity(row),
+    avatarPath: row.avatar_path ?? null,
     active: row.active,
     createdAt: row.created_at ?? "",
   }));
@@ -144,13 +147,15 @@ export async function createManagedAdminUser(input: {
   email: string;
   role: AdminRole;
   passwordHash: string;
+  avatarPath: string | null;
 }) {
-  return await callSupabaseRpc<number>("hoza_admin_create_user", {
+  return await callSupabaseRpc<number>("hoza_admin_create_user_with_avatar", {
     p_actor_id: input.actorId,
     p_name: input.name,
     p_email: normalizeEmail(input.email),
     p_role: input.role,
     p_password_hash: input.passwordHash,
+    p_avatar_path: input.avatarPath,
   });
 }
 
