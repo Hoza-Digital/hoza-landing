@@ -53,6 +53,7 @@ export type NewArticle = {
   geoSummary: string;
   status: ArticleStatus;
   publishDate: string;
+  scheduledFor: string | null;
 };
 
 export type CreatedArticle = {
@@ -204,5 +205,6 @@ export async function createArticle(article: NewArticle): Promise<CreatedArticle
     p_geo_summary: article.geoSummary,
     p_status: article.status,
     p_publish_date: article.publishDate,
+    p_scheduled_for: article.scheduledFor,
   });
 }

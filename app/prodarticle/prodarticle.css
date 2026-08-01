@@ -283,7 +283,8 @@
   box-shadow: 0 1.5rem 4rem color-mix(in oklch, black 44%, transparent);
   backdrop-filter: blur(18px);
 }
-.prod-publish-bar > div:first-child { display: grid; grid-template-columns: 11rem 12rem; gap: .8rem; }
+.prod-publish-controls { display: grid; grid-template-columns: 12rem; gap: .8rem; }
+.prod-publish-controls.has-schedule { grid-template-columns: 12rem 11rem 10rem; }
 .prod-field.compact { gap: .35rem; }
 .prod-field.compact input,
 .prod-field.compact select { min-height: 2.9rem; padding-block: .55rem; font-size: .72rem; }
@@ -377,7 +378,8 @@
   .prod-field-wide { grid-column: auto; }
   .prod-fields { padding: 1rem; }
   .prod-publish-bar { position: static; display: grid; gap: 1rem; }
-  .prod-publish-bar > div:first-child { grid-template-columns: 1fr 1fr; }
+  .prod-publish-controls,
+  .prod-publish-controls.has-schedule { width: 100%; grid-template-columns: 1fr; }
   .prod-publish-action { justify-items: stretch; }
   .prod-publish-action button { width: 100%; }
   .prod-result { align-items: flex-start; flex-wrap: wrap; }
