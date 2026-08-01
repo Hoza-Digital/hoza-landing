@@ -105,8 +105,8 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
   const [title, setTitle] = useState("");
   const [seoTitle, setSeoTitle] = useState("");
   const [seoTitleCustomized, setSeoTitleCustomized] = useState(false);
-  const [coverAlt, setCoverAlt] = useState("");
-  const [coverAltCustomized, setCoverAltCustomized] = useState(false);
+  const [coverAlt, setCoverAlt] = useState(initialImages[0]?.altText ?? "");
+  const [coverAltCustomized, setCoverAltCustomized] = useState(Boolean(initialImages[0]));
   const [publishDate, setPublishDate] = useState(defaultPublishDate);
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -156,6 +156,12 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
 
   const uploadImage = async () => {
     if (!compressed) return;
+    const savedAltText = coverAlt.trim();
+    if (savedAltText.length < 3 || savedAltText.length > 180) {
+      setImageState("error");
+      setImageMessage("Describe the image in 3 to 180 characters before uploading it.");
+      return;
+    }
     setImageState("uploading");
     setImageMessage("Uploading the optimized image to the gallery…");
 
@@ -165,6 +171,7 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
         headers: {
           "Content-Type": "image/webp",
           "x-file-name": encodeURIComponent(compressed.originalName),
+          "x-image-alt": encodeURIComponent(savedAltText),
           "x-image-width": String(compressed.width),
           "x-image-height": String(compressed.height),
         },
@@ -185,6 +192,20 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
     }
   };
 
+  const selectGalleryImage = (image: ArticleImage) => {
+    setSelectedImage(image);
+    setCoverAlt(image.altText);
+    setCoverAltCustomized(true);
+  };
+
+  const showGallery = () => {
+    setSourceMode("gallery");
+    if (selectedImage) {
+      setCoverAlt(selectedImage.altText);
+      setCoverAltCustomized(true);
+    }
+  };
+
   return (
     <>
       <section className="prodarticle-hero">
@@ -198,6 +219,7 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
       <form className="prodarticle-form" action={formAction}>
         <input type="hidden" name="coverImageUrl" value={selectedImage?.publicUrl ?? ""} />
         <input type="hidden" name="coverImagePath" value={selectedImage?.storagePath ?? ""} />
+        <input type="hidden" name="coverImageAlt" value={coverAlt} />
 
         <section className="prod-panel prod-image-panel" aria-labelledby="cover-heading">
           <header className="prod-panel-heading">
@@ -209,7 +231,7 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
             <button type="button" role="tab" aria-selected={sourceMode === "upload"} className={sourceMode === "upload" ? "is-active" : ""} onClick={() => setSourceMode("upload")}>
               <ImagePlus aria-hidden="true" /> New upload
             </button>
-            <button type="button" role="tab" aria-selected={sourceMode === "gallery"} className={sourceMode === "gallery" ? "is-active" : ""} onClick={() => setSourceMode("gallery")}>
+            <button type="button" role="tab" aria-selected={sourceMode === "gallery"} className={sourceMode === "gallery" ? "is-active" : ""} onClick={showGallery}>
               <GalleryHorizontal aria-hidden="true" /> Gallery <span>{images.length}</span>
             </button>
           </div>
@@ -231,6 +253,12 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
                 )}
               </div>
 
+              <label className="prod-field prod-image-alt">
+                <span>Cover image alt text *</span>
+                <input value={coverAlt} onChange={(event) => { setCoverAltCustomized(true); setCoverAlt(event.target.value); }} required minLength={3} maxLength={180} placeholder="Describe what is visible in the image" />
+                <small>This description is saved with the image and appears when you hover over it in the gallery.</small>
+              </label>
+
               <div className={`prod-image-status is-${imageState}`} aria-live="polite">
                 {imageState === "compressing" || imageState === "uploading" ? <LoaderCircle className="admin-spin" aria-hidden="true" /> : imageState === "ready" ? <Check aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
                 <span>{imageMessage || "Your source image stays in the browser until the WebP version is ready."}</span>
@@ -243,12 +271,13 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
                 <button
                   type="button"
                   className={selectedImage?.id === image.id ? "is-selected" : ""}
-                  onClick={() => setSelectedImage(image)}
+                  onClick={() => selectGalleryImage(image)}
                   key={image.id}
-                  aria-label={`Select ${image.originalName}`}
+                  aria-label={`Select ${image.originalName}. ${image.altText}`}
                 >
                   <span className="prod-gallery-image">
                     <Image src={image.publicUrl} alt="" fill sizes="(max-width: 720px) 50vw, 20vw" />
+                    <span className="prod-gallery-alt">{image.altText}</span>
                   </span>
                   <span className="prod-gallery-meta"><strong>{image.originalName}</strong><small>{formatBytes(image.sizeBytes)} · {image.width} × {image.height}</small></span>
                   {selectedImage?.id === image.id && <i><Check aria-hidden="true" /></i>}
@@ -264,12 +293,6 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
             </div>
           )}
 
-          <div className="prod-fields prod-image-alt">
-            <label className="prod-field">
-              <span>Cover image alt text *</span>
-              <input name="coverImageAlt" value={coverAlt} onChange={(event) => { setCoverAltCustomized(true); setCoverAlt(event.target.value); }} required minLength={3} maxLength={180} placeholder="Describe what is visible in the image" />
-            </label>
-          </div>
         </section>
 
         <section className="prod-panel" aria-labelledby="story-heading">

@@ -39,18 +39,24 @@ export async function POST(request: Request) {
   }
 
   let originalName = "article-image.webp";
+  let altText = "";
   try {
     originalName = decodeURIComponent(request.headers.get("x-file-name") ?? originalName)
       .replace(/[\u0000-\u001f\u007f]/g, "")
       .slice(0, 180) || originalName;
+    altText = decodeURIComponent(request.headers.get("x-image-alt") ?? "").trim();
   } catch {
-    // Keep the safe fallback name.
+    return error("Invalid image metadata.", 400);
+  }
+  if (altText.length < 3 || altText.length > 180) {
+    return error("Image alt text must be between 3 and 180 characters.", 400);
   }
 
   const saved = await saveArticleImage(body, originalName);
   const image = {
     ...saved,
     originalName,
+    altText,
     sizeBytes: body.byteLength,
     width,
     height,

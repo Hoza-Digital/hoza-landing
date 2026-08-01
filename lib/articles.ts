@@ -8,6 +8,7 @@ export type ArticleImage = {
   storagePath: string;
   publicUrl: string;
   originalName: string;
+  altText: string;
   sizeBytes: number;
   width: number;
   height: number;
@@ -67,6 +68,7 @@ type ArticleImageRow = {
   storage_path: string;
   public_url: string;
   original_name: string;
+  alt_text: string;
   size_bytes: number | string;
   width: number;
   height: number;
@@ -161,6 +163,7 @@ export async function listArticleImages(): Promise<ArticleImage[]> {
     storagePath: row.storage_path,
     publicUrl: row.public_url,
     originalName: row.original_name,
+    altText: row.alt_text,
     sizeBytes: Number(row.size_bytes),
     width: row.width,
     height: row.height,
@@ -173,6 +176,7 @@ export async function registerArticleImage(image: Omit<ArticleImage, "id" | "cre
     p_storage_path: image.storagePath,
     p_public_url: image.publicUrl,
     p_original_name: image.originalName,
+    p_alt_text: image.altText,
     p_size_bytes: image.sizeBytes,
     p_width: image.width,
     p_height: image.height,
