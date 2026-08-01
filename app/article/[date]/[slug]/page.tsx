@@ -14,6 +14,11 @@ type ArticlePageProps = {
 };
 
 const getArticle = cache(getPublishedArticle);
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hozadigital.com").replace(/\/+$/, "");
+
+function absoluteUrl(value: string) {
+  return new URL(value, `${siteUrl}/`).toString();
+}
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en", { day: "numeric", month: "long", year: "numeric" })
@@ -74,6 +79,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const article = await getArticle(date, slug);
   if (!article) return { title: "Article not found — Hoza Digital" };
   const path = `/article/${date}/${article.slug}`;
+  const coverImageUrl = absoluteUrl(article.coverImageUrl);
 
   return {
     title: article.seoTitle,
@@ -90,13 +96,13 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       modifiedTime: article.updatedAt,
       authors: [article.authorName],
       section: article.category,
-      images: [{ url: article.coverImageUrl, alt: article.coverImageAlt }],
+      images: [{ url: coverImageUrl, alt: article.coverImageAlt }],
     },
     twitter: {
       card: "summary_large_image",
       title: article.seoTitle,
       description: article.seoDescription,
-      images: [article.coverImageUrl],
+      images: [coverImageUrl],
     },
   };
 }
@@ -107,15 +113,15 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   const article = await getArticle(date, slug);
   if (!article) notFound();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hozadigital.com";
   const canonical = `${siteUrl}/article/${date}/${article.slug}`;
+  const coverImageUrl = absoluteUrl(article.coverImageUrl);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: article.title,
     description: article.seoDescription,
     articleSection: article.category,
-    image: [article.coverImageUrl],
+    image: [coverImageUrl],
     datePublished: article.publishedAt,
     dateModified: article.updatedAt,
     mainEntityOfPage: canonical,

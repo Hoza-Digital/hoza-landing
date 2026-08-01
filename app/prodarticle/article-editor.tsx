@@ -202,7 +202,7 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
         <section className="prod-panel prod-image-panel" aria-labelledby="cover-heading">
           <header className="prod-panel-heading">
             <div><span>01</span><h2 id="cover-heading">Cover image</h2></div>
-            <p>WebP only · maximum 1 MB · stored in Supabase</p>
+            <p>WebP only · maximum 1 MB · stored in the server image library</p>
           </header>
 
           <div className="prod-source-tabs" role="tablist" aria-label="Cover image source">
