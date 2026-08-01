@@ -36,6 +36,7 @@ const initialArticleFormState: ArticleFormState = { status: "idle", message: "" 
 type ArticleEditorProps = {
   initialImages: ArticleImage[];
   articles: ArticleSummary[];
+  authorName: string;
   defaultPublishDate: string;
   defaultDraftDate: string;
   defaultDraftTime: string;
@@ -49,6 +50,7 @@ function formatArticleDate(date: string) {
 export function ArticleEditor({
   initialImages,
   articles,
+  authorName,
   defaultPublishDate,
   defaultDraftDate,
   defaultDraftTime,
@@ -312,7 +314,14 @@ export function ArticleEditor({
             </label>
             <label className="prod-field">
               <span>Author *</span>
-              <input name="authorName" required minLength={2} maxLength={80} defaultValue="Hoza Digital" />
+              <input
+                name="authorName"
+                value={authorName}
+                readOnly
+                aria-readonly="true"
+                className="prod-author-locked"
+              />
+              <small>Set automatically from the signed-in dashboard user.</small>
             </label>
             <label className="prod-field prod-field-wide">
               <span>Short excerpt *</span>
