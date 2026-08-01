@@ -7,3 +7,6 @@ out
 !.env.example
 .DS_Store
 npm-debug.log*
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal

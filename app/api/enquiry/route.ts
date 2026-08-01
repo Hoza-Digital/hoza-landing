@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { createEnquiry } from "@/lib/enquiries";
 
 const enquirySchema = z.object({
   name: z.string().trim().min(2, "Please enter your name.").max(100),
@@ -30,12 +31,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const enquiryId = createEnquiry(parsed.data);
     const webhook = process.env.CRM_WEBHOOK_URL;
     if (webhook) {
       const response = await fetch(webhook, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          enquiryId,
           source: "hoza-website",
           receivedAt: new Date().toISOString(),
           ...parsed.data,
@@ -45,16 +48,12 @@ export async function POST(request: Request) {
 
       if (!response.ok) {
         console.error("CRM webhook rejected enquiry", response.status);
-        return NextResponse.json({ message: "The request could not be transmitted. Please contact Hoza directly." }, { status: 502 });
       }
     } else {
-      console.info("Hoza enquiry received (CRM webhook not configured)", {
-        ...parsed.data,
-        description: `${parsed.data.description.slice(0, 80)}…`,
-      });
+      console.info("Hoza enquiry stored", { enquiryId });
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, enquiryId }, { status: 201 });
   } catch (error) {
     console.error("Enquiry route error", error);
     return NextResponse.json({ message: "The request could not be processed right now." }, { status: 500 });
