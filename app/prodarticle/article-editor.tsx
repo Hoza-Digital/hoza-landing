@@ -103,8 +103,6 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
   const [imageState, setImageState] = useState<"idle" | "compressing" | "ready" | "uploading" | "error">("idle");
   const [imageMessage, setImageMessage] = useState("");
   const [title, setTitle] = useState("");
-  const [seoTitle, setSeoTitle] = useState("");
-  const [seoTitleCustomized, setSeoTitleCustomized] = useState(false);
   const [coverAlt, setCoverAlt] = useState(initialImages[0]?.altText ?? "");
   const [coverAltCustomized, setCoverAltCustomized] = useState(Boolean(initialImages[0]));
   const [publishDate, setPublishDate] = useState(defaultPublishDate);
@@ -126,7 +124,6 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
 
   const onTitleChange = (value: string) => {
     setTitle(value);
-    if (!seoTitleCustomized) setSeoTitle(value);
     if (!coverAltCustomized) setCoverAlt(value ? `${value} — Hoza Digital article cover` : "");
   };
 
@@ -298,7 +295,7 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
         <section className="prod-panel" aria-labelledby="story-heading">
           <header className="prod-panel-heading">
             <div><span>02</span><h2 id="story-heading">Article story</h2></div>
-            <p>The title becomes the clean URL slug automatically.</p>
+            <p>Everything here automatically powers the article’s SEO and GEO discovery.</p>
           </header>
 
           <div className="prod-fields two-columns">
@@ -330,30 +327,6 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
               <span>Main content *</span>
               <textarea name="content" required minLength={50} rows={18} placeholder={"Write the article in clear paragraphs.\n\n## Use this for a section heading\n### Use this for a smaller heading\n- Use hyphens for a list\n> Use this for an important quote"} />
               <small>Formatting supported: <strong>## heading</strong>, <strong>### subheading</strong>, <strong>- list</strong> and <strong>&gt; quote</strong>.</small>
-            </label>
-          </div>
-        </section>
-
-        <section className="prod-panel" aria-labelledby="discovery-heading">
-          <header className="prod-panel-heading">
-            <div><span>03</span><h2 id="discovery-heading">SEO + GEO discovery</h2></div>
-            <p>Search snippets and a concise answer-engine summary.</p>
-          </header>
-
-          <div className="prod-fields">
-            <label className="prod-field">
-              <span>SEO title *</span>
-              <input name="seoTitle" value={seoTitle} onChange={(event) => { setSeoTitleCustomized(true); setSeoTitle(event.target.value); }} required minLength={3} maxLength={180} />
-              <small>{seoTitle.length} / 60 recommended characters</small>
-            </label>
-            <label className="prod-field">
-              <span>SEO description *</span>
-              <textarea name="seoDescription" required minLength={20} maxLength={320} rows={4} placeholder="Summarize the value of this article for search results." />
-              <small>Recommended: 140–160 characters.</small>
-            </label>
-            <label className="prod-field">
-              <span>GEO summary</span>
-              <textarea name="geoSummary" maxLength={800} rows={5} placeholder="State the central answer, entity or takeaway in plain language for generative search systems." />
             </label>
           </div>
         </section>
