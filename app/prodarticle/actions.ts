@@ -15,12 +15,21 @@ const articleSchema = z.object({
   coverImagePath: z.string().regex(/^\d{6}\/[a-z0-9]+(?:-[a-z0-9]+)*\.webp$/),
   coverImageAlt: z.string().trim().min(3).max(180),
   authorName: z.string().trim().min(2).max(80),
-  seoTitle: z.string().trim().min(3).max(180),
-  seoDescription: z.string().trim().min(20).max(320),
-  geoSummary: z.string().trim().max(800),
   status: z.enum(ARTICLE_STATUSES),
   publishDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
+
+function cleanDiscoveryText(value: string) {
+  return value
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^[-*>]\s+/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function createGeoSummary(category: string, excerpt: string, content: string) {
+  return cleanDiscoveryText(`${category}: ${excerpt} ${content}`).slice(0, 800).trim();
+}
 
 export type ArticleFormState = {
   status: "idle" | "error" | "success";
@@ -44,9 +53,6 @@ export async function publishArticle(
     coverImagePath: formData.get("coverImagePath"),
     coverImageAlt: formData.get("coverImageAlt"),
     authorName: formData.get("authorName"),
-    seoTitle: formData.get("seoTitle"),
-    seoDescription: formData.get("seoDescription"),
-    geoSummary: formData.get("geoSummary") ?? "",
     status: formData.get("status"),
     publishDate: formData.get("publishDate"),
   });
@@ -62,7 +68,13 @@ export async function publishArticle(
   if (!slug) return { status: "error", message: "The title needs letters or numbers to create a URL." };
 
   try {
-    const result = await createArticle({ ...parsed.data, slug });
+    const result = await createArticle({
+      ...parsed.data,
+      slug,
+      seoTitle: parsed.data.title,
+      seoDescription: parsed.data.excerpt.slice(0, 320),
+      geoSummary: createGeoSummary(parsed.data.category, parsed.data.excerpt, parsed.data.content),
+    });
     revalidatePath("/article");
     revalidatePath(result.path);
     revalidatePath("/sitemap.xml");
