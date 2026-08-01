@@ -34,7 +34,7 @@
 .user-create-form label { display: grid; gap: .5rem; }
 .user-create-form label > span,
 .user-role-form label > span { color: var(--muted); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; }
-.user-create-form label > small { color: var(--muted); font-size: .55rem; line-height: 1.45; }
+.user-password-rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .25rem 1rem; margin: 0; padding-left: 1rem; color: var(--muted); font-size: .55rem; line-height: 1.45; }
 .user-create-form input,
 .user-create-form select,
 .user-role-form select { width: 100%; min-height: 3.35rem; padding: .8rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-strong); color: var(--text); }

@@ -88,13 +88,21 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
                 type="password"
                 minLength={8}
                 maxLength={128}
+                pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[A-Za-z])(?=.*[^A-Za-z0-9\s]).{8,128}"
                 required
                 placeholder="Enter a case-sensitive password"
                 autoComplete="new-password"
                 aria-describedby="new-user-password-help"
+                title="Use at least 8 characters with an uppercase letter, a lowercase letter and a special character."
               />
             </div>
-            <small id="new-user-password-help">Minimum 8 characters. Uppercase and lowercase letters remain different.</small>
+            <ul id="new-user-password-help" className="user-password-rules">
+              <li>Minimum 8 characters</li>
+              <li>At least 1 uppercase letter</li>
+              <li>At least 1 lowercase letter</li>
+              <li>At least 1 alphabetic character</li>
+              <li>At least 1 special character</li>
+            </ul>
           </label>
           <label>
             <span>Role *</span>
