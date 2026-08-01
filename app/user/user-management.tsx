@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useActionState, useRef, useState, type ChangeEvent } from "react";
+import { useActionState, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   ArrowUpRight,
   Camera,
@@ -58,15 +58,52 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function isEmailFormat(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 export function UserManagement({ users, creatableRoleOptions }: UserManagementProps) {
   const [state, formAction, pending] = useActionState(createUser, initialState);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState({
     status: "idle" as "idle" | "processing" | "ready" | "error",
     dataUrl: "",
     fileName: "",
     message: "Optional · JPG, PNG or WebP · automatically cropped and optimized",
   });
+
+  const passwordChecks = [
+    { key: "length", label: "Minimum 8 characters", met: password.length >= 8 },
+    { key: "uppercase", label: "At least 1 uppercase letter", met: /[A-Z]/.test(password) },
+    { key: "lowercase", label: "At least 1 lowercase letter", met: /[a-z]/.test(password) },
+    { key: "alphabet", label: "At least 1 alphabetic character", met: /[A-Za-z]/.test(password) },
+    { key: "special", label: "At least 1 special character", met: /[^A-Za-z0-9\s]/.test(password) },
+  ];
+  const passwordIsValid = passwordChecks.every((check) => check.met);
+
+  const flashInvalidField = (field: "email" | "password") => {
+    const input = field === "email" ? emailInputRef.current : passwordInputRef.current;
+    if (!input) return;
+    input.classList.remove("is-invalid-flash");
+    void input.offsetWidth;
+    input.classList.add("is-invalid-flash");
+    window.setTimeout(() => input.classList.remove("is-invalid-flash"), 1150);
+  };
+
+  const validateCredentials = () => {
+    const emailIsValid = isEmailFormat(email);
+    if (!emailIsValid) flashInvalidField("email");
+    if (!passwordIsValid) flashInvalidField("password");
+    return emailIsValid && passwordIsValid;
+  };
+
+  const handleCreateSubmit = (event: FormEvent<HTMLFormElement>) => {
+    if (!validateCredentials()) event.preventDefault();
+  };
 
   const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -112,7 +149,7 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
           </div>
         </header>
 
-        <form action={formAction} className="user-create-form">
+        <form action={formAction} className="user-create-form" onSubmit={handleCreateSubmit}>
           <label>
             <span>Name *</span>
             <input name="name" minLength={2} maxLength={100} required placeholder="Full name" autoComplete="name" />
@@ -121,7 +158,23 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
             <span>Username (email) *</span>
             <div className="user-input-wrap">
               <Mail aria-hidden="true" />
-              <input name="email" type="email" maxLength={254} required placeholder="name@company.com" autoComplete="off" />
+              <input
+                ref={emailInputRef}
+                name="email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                onInvalid={(event) => {
+                  event.preventDefault();
+                  flashInvalidField("email");
+                }}
+                pattern={"^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"}
+                maxLength={254}
+                required
+                placeholder="name@company.com"
+                autoComplete="off"
+                aria-invalid={email.length > 0 && !isEmailFormat(email)}
+              />
             </div>
           </label>
           <label>
@@ -129,24 +182,30 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
             <div className="user-input-wrap">
               <KeyRound aria-hidden="true" />
               <input
+                ref={passwordInputRef}
                 name="password"
                 type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                onInvalid={(event) => {
+                  event.preventDefault();
+                  flashInvalidField("password");
+                }}
                 minLength={8}
                 maxLength={128}
-                pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[A-Za-z])(?=.*[^A-Za-z0-9\s]).{8,128}"
+                pattern={"(?=.*[A-Z])(?=.*[a-z])(?=.*[A-Za-z])(?=.*[^A-Za-z0-9\\s]).{8,128}"}
                 required
                 placeholder="Enter a case-sensitive password"
                 autoComplete="new-password"
                 aria-describedby="new-user-password-help"
+                aria-invalid={password.length > 0 && !passwordIsValid}
                 title="Use at least 8 characters with an uppercase letter, a lowercase letter and a special character."
               />
             </div>
             <ul id="new-user-password-help" className="user-password-rules">
-              <li>Minimum 8 characters</li>
-              <li>At least 1 uppercase letter</li>
-              <li>At least 1 lowercase letter</li>
-              <li>At least 1 alphabetic character</li>
-              <li>At least 1 special character</li>
+              {passwordChecks.map((check) => (
+                <li key={check.key} className={check.met ? "is-met" : ""}>{check.label}</li>
+              ))}
             </ul>
           </label>
           <label>
@@ -191,7 +250,12 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
             <input type="hidden" name="avatarFileName" value={avatar.fileName} />
           </div>
 
-          <button type="submit" className="user-create-button" disabled={pending || avatar.status === "processing"}>
+          <button
+            type="submit"
+            className="user-create-button"
+            disabled={pending || avatar.status === "processing"}
+            onClick={() => void validateCredentials()}
+          >
             {pending ? <LoaderCircle className="admin-spin" aria-hidden="true" /> : <ArrowUpRight aria-hidden="true" />}
             {pending ? "Creating user…" : "Create user"}
           </button>

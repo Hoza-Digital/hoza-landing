@@ -34,13 +34,18 @@
 .user-create-form label { display: grid; gap: .5rem; }
 .user-create-form label > span,
 .user-role-form label > span { color: var(--muted); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; }
-.user-password-rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .25rem 1rem; margin: 0; padding-left: 1rem; color: var(--muted); font-size: .55rem; line-height: 1.45; }
+.user-password-rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .25rem 1rem; margin: 0; padding: 0; color: var(--muted); font-size: .55rem; line-height: 1.45; list-style: none; }
+.user-password-rules li { display: flex; align-items: center; gap: .35rem; transition: color 160ms ease; }
+.user-password-rules li::before { content: "○"; flex: 0 0 auto; color: var(--line-strong); font-size: .7rem; line-height: 1; transition: color 160ms ease, transform 160ms ease; }
+.user-password-rules li.is-met { color: var(--success); }
+.user-password-rules li.is-met::before { content: "✓"; color: var(--success); transform: scale(1.08); }
 .user-create-form input,
 .user-create-form select,
 .user-role-form select { width: 100%; min-height: 3.35rem; padding: .8rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-strong); color: var(--text); }
 .user-create-form input:focus,
 .user-create-form select:focus,
 .user-role-form select:focus { border-color: var(--violet); }
+.user-create-form input.is-invalid-flash { animation: user-invalid-flash-three 1.05s ease-out; }
 .user-input-wrap { position: relative; }
 .user-input-wrap > svg { position: absolute; top: 50%; left: 1rem; width: .95rem; color: var(--violet); transform: translateY(-50%); pointer-events: none; }
 .user-input-wrap input { padding-left: 2.75rem; }
@@ -129,4 +134,12 @@
 @media (prefers-reduced-motion: reduce) {
   .user-create-button,
   .user-role-form button { transition: none; }
+  .user-password-rules li,
+  .user-password-rules li::before { transition: none; }
+  .user-create-form input.is-invalid-flash { animation: none; border-color: var(--error); box-shadow: 0 0 0 3px color-mix(in oklch, var(--error) 18%, transparent); }
+}
+
+@keyframes user-invalid-flash-three {
+  0%, 14%, 28%, 42%, 100% { border-color: var(--line); box-shadow: none; }
+  7%, 21%, 35% { border-color: var(--error); box-shadow: 0 0 0 3px color-mix(in oklch, var(--error) 18%, transparent); }
 }
