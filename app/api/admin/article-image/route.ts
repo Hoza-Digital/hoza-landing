@@ -1,4 +1,5 @@
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-auth";
+import { canAccessArticleProduction } from "@/lib/admin-users";
 import { registerArticleImage } from "@/lib/articles";
 import { deleteArticleImage, saveArticleImage } from "@/lib/image-library";
 
@@ -10,7 +11,9 @@ function error(message: string, status: number) {
 }
 
 export async function POST(request: Request) {
-  if (!(await isAdminAuthenticated())) return error("Admin login required.", 401);
+  const admin = await getAdminSession();
+  if (!admin) return error("Admin login required.", 401);
+  if (!canAccessArticleProduction(admin.role)) return error("Not found.", 404);
   if (request.headers.get("content-type")?.split(";")[0] !== "image/webp") {
     return error("Only WebP images are accepted.", 415);
   }

@@ -1,6 +1,7 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AdminTopbar } from "@/app/admin/admin-topbar";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-auth";
+import { canAccessArticleProduction } from "@/lib/admin-users";
 import { listAdminArticles, listArticleImages } from "@/lib/articles";
 import { ArticleEditor } from "./article-editor";
 
@@ -25,7 +26,9 @@ function formatJakartaTime(date: Date) {
 }
 
 export default async function ProduceArticlePage() {
-  if (!(await isAdminAuthenticated())) redirect("/admlog");
+  const admin = await getAdminSession();
+  if (!admin) redirect("/admlog");
+  if (!canAccessArticleProduction(admin.role)) notFound();
 
   const [images, articles] = await Promise.all([
     listArticleImages(),
@@ -37,7 +40,7 @@ export default async function ProduceArticlePage() {
 
   return (
     <main className="admin-dashboard prodarticle-page">
-      <AdminTopbar />
+      <AdminTopbar user={admin} />
       <ArticleEditor
         initialImages={images}
         articles={articles}

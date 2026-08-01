@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
-import { endAdminSession, isAdminAuthenticated } from "@/lib/admin-auth";
+import { endAdminSession, getAdminSession } from "@/lib/admin-auth";
+import { canAccessProjectSignals } from "@/lib/admin-users";
 import { ENQUIRY_STATUSES, updateEnquiryStatus } from "@/lib/enquiries";
 
 const updateSchema = z.object({
@@ -17,7 +18,9 @@ export async function logoutAdmin() {
 }
 
 export async function changeEnquiryStatus(formData: FormData) {
-  if (!(await isAdminAuthenticated())) redirect("/admlog");
+  const admin = await getAdminSession();
+  if (!admin) redirect("/admlog");
+  if (!canAccessProjectSignals(admin.role)) notFound();
 
   const parsed = updateSchema.safeParse({
     id: formData.get("id"),

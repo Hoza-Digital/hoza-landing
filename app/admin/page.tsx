@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-auth";
 import { getEnquiryStats } from "@/lib/enquiries";
 import { AdminTopbar } from "./admin-topbar";
 import { AdminStats } from "./enquiry-dashboard";
@@ -7,13 +7,14 @@ import { AdminStats } from "./enquiry-dashboard";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  if (!(await isAdminAuthenticated())) redirect("/admlog");
+  const admin = await getAdminSession();
+  if (!admin) redirect("/admlog");
 
   const stats = await getEnquiryStats();
 
   return (
     <main className="admin-dashboard">
-      <AdminTopbar />
+      <AdminTopbar user={admin} />
 
       <section className="admin-dashboard-hero">
         <div>
