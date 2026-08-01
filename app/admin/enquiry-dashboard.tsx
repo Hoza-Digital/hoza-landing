@@ -88,7 +88,9 @@ export function ProjectSignals({ enquiries }: ProjectSignalsProps) {
         .toLowerCase()
         .includes(deferredQuery);
     const matchesService = service === "all" || enquiry.service === service;
-    const matchesStatus = status === "all" || enquiry.status === status;
+    const matchesStatus = status === "all"
+      ? enquiry.status !== "archived"
+      : enquiry.status === status;
     return matchesQuery && matchesService && matchesStatus;
   });
 

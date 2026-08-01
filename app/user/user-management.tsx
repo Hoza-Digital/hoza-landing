@@ -83,6 +83,7 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
     { key: "uppercase", label: "At least 1 uppercase letter", met: /[A-Z]/.test(password) },
     { key: "lowercase", label: "At least 1 lowercase letter", met: /[a-z]/.test(password) },
     { key: "alphabet", label: "At least 1 alphabetic character", met: /[A-Za-z]/.test(password) },
+    { key: "numeric", label: "At least 1 numeric character", met: /[0-9]/.test(password) },
     { key: "special", label: "At least 1 special character", met: /[^A-Za-z0-9\s]/.test(password) },
   ];
   const nameIsValid = name.trim().length >= 2;
@@ -216,13 +217,13 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
                 }}
                 minLength={8}
                 maxLength={128}
-                pattern={"(?=.*[A-Z])(?=.*[a-z])(?=.*[A-Za-z])(?=.*[^A-Za-z0-9\\s]).{8,128}"}
+                pattern={"(?=.*[A-Z])(?=.*[a-z])(?=.*[A-Za-z])(?=.*[0-9])(?=.*[^A-Za-z0-9\\s]).{8,128}"}
                 required
                 placeholder="Enter a case-sensitive password"
                 autoComplete="new-password"
                 aria-describedby="new-user-password-help"
                 aria-invalid={password.length > 0 && !passwordIsValid}
-                title="Use at least 8 characters with an uppercase letter, a lowercase letter and a special character."
+                title="Use at least 8 characters with an uppercase letter, a lowercase letter, a numeric character and a special character."
               />
             </div>
             <ul id="new-user-password-help" className="user-password-rules">
