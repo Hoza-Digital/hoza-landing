@@ -44,6 +44,7 @@ export default async function ProduceArticlePage() {
       <ArticleEditor
         initialImages={images}
         articles={articles}
+        authorName={admin.name}
         defaultPublishDate={formatJakartaDate(now)}
         defaultDraftDate={formatJakartaDate(draftTarget)}
         defaultDraftTime={formatJakartaTime(draftTarget)}

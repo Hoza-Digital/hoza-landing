@@ -21,7 +21,6 @@ const articleSchema = z.object({
   coverImageUrl: z.string().regex(/^\/image\/\d{6}\/[a-z0-9]+(?:-[a-z0-9]+)*$/),
   coverImagePath: z.string().regex(/^\d{6}\/[a-z0-9]+(?:-[a-z0-9]+)*\.webp$/),
   coverImageAlt: z.string().trim().min(3).max(180),
-  authorName: z.string().trim().min(2).max(80),
   status: z.enum(ARTICLE_STATUSES),
   publishDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   publishTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).nullable(),
@@ -65,7 +64,6 @@ export async function publishArticle(
     coverImageUrl: formData.get("coverImageUrl"),
     coverImagePath: formData.get("coverImagePath"),
     coverImageAlt: formData.get("coverImageAlt"),
-    authorName: formData.get("authorName"),
     status: submittedStatus,
     publishDate: isDraft ? formData.get("publishDate") : formatJakartaDate(new Date()),
     publishTime: isDraft ? formData.get("publishTime") : null,
@@ -97,6 +95,7 @@ export async function publishArticle(
   try {
     const result = await createArticle({
       ...parsed.data,
+      authorName: admin.name,
       slug,
       scheduledFor,
       seoTitle: parsed.data.title,

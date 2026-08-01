@@ -259,6 +259,7 @@
 .prod-fields { display: grid; gap: 1.1rem; padding: 1.5rem; }
 .prod-image-alt { grid-column: 1 / -1; padding-top: 1.2rem; border-top: 1px solid var(--line); }
 .prod-fields.two-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.prod-fields.two-columns > .prod-field:not(.prod-field-wide) { align-self: start; }
 .prod-field { display: grid; gap: .55rem; }
 .prod-field-wide { grid-column: 1 / -1; }
 .prod-field > span { color: var(--muted); font-size: .62rem; letter-spacing: .09em; text-transform: uppercase; }
@@ -281,6 +282,13 @@
 .prod-field > select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px var(--accent-wash); }
 .prod-field > input::placeholder,
 .prod-field > textarea::placeholder { color: var(--placeholder); }
+.prod-field > input.prod-author-locked {
+  border-color: color-mix(in oklch, var(--violet) 42%, var(--line));
+  background: color-mix(in oklch, var(--accent-wash) 52%, var(--surface-strong));
+  color: var(--lavender);
+  cursor: not-allowed;
+}
+.prod-field > input.prod-author-locked:focus { box-shadow: none; }
 .prod-field > small { color: var(--muted); font-size: .59rem; line-height: 1.5; }
 .prod-field > small strong { color: var(--lavender); font-weight: 500; overflow-wrap: anywhere; }
 
