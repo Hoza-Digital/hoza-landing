@@ -47,10 +47,10 @@ function createSessionValue(admin: AdminIdentity, secret: string) {
   return `${encodedPayload}.${signature(encodedPayload, secret)}`;
 }
 
-async function verifySessionValue(value: string, secret: string) {
+async function verifySessionValue(value: string, secret: string): Promise<AdminIdentity | null> {
   const [encodedPayload, providedSignature] = value.split(".");
-  if (!encodedPayload || !providedSignature) return false;
-  if (!safeEqual(providedSignature, signature(encodedPayload, secret))) return false;
+  if (!encodedPayload || !providedSignature) return null;
+  if (!safeEqual(providedSignature, signature(encodedPayload, secret))) return null;
 
   try {
     const payload = JSON.parse(
@@ -63,13 +63,13 @@ async function verifySessionValue(value: string, secret: string) {
       typeof payload.expiresAt !== "number" ||
       payload.expiresAt <= Date.now()
     ) {
-      return false;
+      return null;
     }
 
     const admin = await getActiveAdminById(payload.adminId);
-    return Boolean(admin && safeEqual(admin.email, payload.email));
+    return admin && safeEqual(admin.email, payload.email) ? admin : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -77,14 +77,18 @@ export async function authenticateAdmin(email: string, password: string) {
   return await verifyAdminCredentials(email, password);
 }
 
-export async function isAdminAuthenticated() {
+export async function getAdminSession(): Promise<AdminIdentity | null> {
   try {
     const secret = getSessionSecret();
     const session = (await cookies()).get(COOKIE_NAME)?.value;
-    return session ? await verifySessionValue(session, secret) : false;
+    return session ? await verifySessionValue(session, secret) : null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+export async function isAdminAuthenticated() {
+  return Boolean(await getAdminSession());
 }
 
 export async function startAdminSession(admin: AdminIdentity) {

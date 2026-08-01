@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-auth";
+import { canAccessArticleProduction } from "@/lib/admin-users";
 import { articleContentToPlainText } from "@/lib/article-content";
 import { ARTICLE_STATUSES, createArticle, slugifyArticleTitle } from "@/lib/articles";
 
@@ -50,7 +51,9 @@ export async function publishArticle(
   _previousState: ArticleFormState,
   formData: FormData,
 ): Promise<ArticleFormState> {
-  if (!(await isAdminAuthenticated())) redirect("/admlog");
+  const admin = await getAdminSession();
+  if (!admin) redirect("/admlog");
+  if (!canAccessArticleProduction(admin.role)) notFound();
 
   const submittedStatus = formData.get("status");
   const isDraft = submittedStatus === "draft";

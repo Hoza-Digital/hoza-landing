@@ -1,9 +1,15 @@
 import Link from "next/link";
-import { FilePlus2, FolderKanban, LayoutDashboard, LogOut, Menu } from "lucide-react";
+import { FilePlus2, FolderKanban, LayoutDashboard, LogOut, Menu, Users } from "lucide-react";
 import { Logo } from "@/components/logo";
+import {
+  ADMIN_ROLE_LABELS,
+  canAccessArticleProduction,
+  canAccessProjectSignals,
+  type AdminIdentity,
+} from "@/lib/admin-users";
 import { logoutAdmin } from "./actions";
 
-export function AdminTopbar() {
+export function AdminTopbar({ user }: { user: AdminIdentity }) {
   return (
     <header className="admin-topbar">
       <Link href="/" className="admin-brand" aria-label="Hoza home">
@@ -18,19 +24,27 @@ export function AdminTopbar() {
           <Menu aria-hidden="true" />
         </summary>
         <div className="admin-menu-panel">
-          <span>ADMIN MENU</span>
+          <span>{ADMIN_ROLE_LABELS[user.role]} MENU</span>
           <nav aria-label="Admin navigation">
             <Link href="/admin">
               <LayoutDashboard aria-hidden="true" />
               Dashboard
             </Link>
-            <Link href="/projectsignal">
-              <FolderKanban aria-hidden="true" />
-              Project signals
-            </Link>
-            <Link href="/prodarticle">
-              <FilePlus2 aria-hidden="true" />
-              Produce article
+            {canAccessProjectSignals(user.role) && (
+              <Link href="/projectsignal">
+                <FolderKanban aria-hidden="true" />
+                Project signals
+              </Link>
+            )}
+            {canAccessArticleProduction(user.role) && (
+              <Link href="/prodarticle">
+                <FilePlus2 aria-hidden="true" />
+                Produce article
+              </Link>
+            )}
+            <Link href="/user">
+              <Users aria-hidden="true" />
+              User management
             </Link>
           </nav>
           <form action={logoutAdmin}>
