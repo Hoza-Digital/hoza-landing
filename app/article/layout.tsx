@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CursorLight } from "@/components/cursor-light";
 import "./article.css";
 
 export const metadata: Metadata = {
@@ -14,5 +15,10 @@ export const metadata: Metadata = {
 };
 
 export default function ArticleLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <div className="article-root">{children}</div>;
+  return (
+    <div className="article-root">
+      <CursorLight />
+      {children}
+    </div>
+  );
 }
