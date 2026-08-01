@@ -28,9 +28,12 @@ const statusLabels: Record<EnquiryStatus, string> = {
   archived: "Archived",
 };
 
-type DashboardProps = {
-  enquiries: Enquiry[];
+type AdminStatsProps = {
   stats: EnquiryStats;
+};
+
+type ProjectSignalsProps = {
+  enquiries: Enquiry[];
 };
 
 function whatsappUrl(number: string) {
@@ -46,7 +49,31 @@ function initials(name: string) {
     .join("");
 }
 
-export function EnquiryDashboard({ enquiries, stats }: DashboardProps) {
+export function AdminStats({ stats }: AdminStatsProps) {
+  const statCards = [
+    { label: "Total enquiries", value: stats.total, note: "All captured leads", icon: Inbox },
+    { label: "New signals", value: stats.fresh, note: "Waiting for review", icon: Sparkles },
+    { label: "Last 30 days", value: stats.recent, note: "Recent momentum", icon: Clock3 },
+    { label: "Service mix", value: stats.services, note: "Distinct interests", icon: Tags },
+  ];
+
+  return (
+    <section className="admin-stats" aria-label="Enquiry summary">
+      {statCards.map((card) => {
+        const Icon = card.icon;
+        return (
+          <article key={card.label} className="admin-stat-card">
+            <div><span>{card.label}</span><Icon aria-hidden="true" /></div>
+            <strong>{String(card.value).padStart(2, "0")}</strong>
+            <p>{card.note}</p>
+          </article>
+        );
+      })}
+    </section>
+  );
+}
+
+export function ProjectSignals({ enquiries }: ProjectSignalsProps) {
   const [query, setQuery] = useState("");
   const [service, setService] = useState("all");
   const [status, setStatus] = useState("all");
@@ -65,28 +92,7 @@ export function EnquiryDashboard({ enquiries, stats }: DashboardProps) {
     return matchesQuery && matchesService && matchesStatus;
   });
 
-  const statCards = [
-    { label: "Total enquiries", value: stats.total, note: "All captured leads", icon: Inbox },
-    { label: "New signals", value: stats.fresh, note: "Waiting for review", icon: Sparkles },
-    { label: "Last 30 days", value: stats.recent, note: "Recent momentum", icon: Clock3 },
-    { label: "Service mix", value: stats.services, note: "Distinct interests", icon: Tags },
-  ];
-
   return (
-    <>
-      <section className="admin-stats" aria-label="Enquiry summary">
-        {statCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <article key={card.label} className="admin-stat-card">
-              <div><span>{card.label}</span><Icon aria-hidden="true" /></div>
-              <strong>{String(card.value).padStart(2, "0")}</strong>
-              <p>{card.note}</p>
-            </article>
-          );
-        })}
-      </section>
-
       <section className="admin-leads-section">
         <div className="admin-section-heading">
           <div>
@@ -201,6 +207,5 @@ export function EnquiryDashboard({ enquiries, stats }: DashboardProps) {
           </div>
         )}
       </section>
-    </>
   );
 }
