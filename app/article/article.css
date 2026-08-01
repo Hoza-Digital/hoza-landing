@@ -305,8 +305,16 @@
 .article-body article h3 { margin: 3rem 0 1rem; font-family: var(--font-body), sans-serif; font-size: clamp(1.6rem, 2.6vw, 2.3rem); line-height: 1.08; letter-spacing: -.035em; }
 .article-body article blockquote { margin: 3rem 0; padding: 1.5rem 0 1.5rem 1.5rem; border-left: 3px solid var(--article-lime); color: var(--text); font-family: var(--font-display), sans-serif; font-size: clamp(2rem, 3.5vw, 3.5rem); line-height: 1; }
 .article-body article ul { display: grid; gap: .7rem; margin: 1rem 0 2rem; padding: 0; list-style: none; }
+.article-body article ol { display: grid; gap: .7rem; margin: 1rem 0 2rem; padding: 0; list-style: none; counter-reset: article-list; }
 .article-body article li { position: relative; padding-left: 1.5rem; }
 .article-body article li::before { content: "↗"; position: absolute; left: 0; color: var(--article-lime); }
+.article-body article ol li { counter-increment: article-list; }
+.article-body article ol li::before { content: counter(article-list) "."; }
+.article-body article strong { color: var(--text); font-weight: 750; }
+.article-body article em { color: var(--text); }
+.article-body article a { color: var(--article-lime); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .22em; }
+.article-inline-image { margin: 3rem 0; overflow: hidden; border: 1px solid var(--line-strong); border-radius: 1rem; background: var(--surface-strong); }
+.article-inline-image img { display: block; width: 100%; height: auto; }
 
 .article-next-step {
   position: relative;

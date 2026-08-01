@@ -4,13 +4,19 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { articleContentToPlainText } from "@/lib/article-content";
 import { ARTICLE_STATUSES, createArticle, slugifyArticleTitle } from "@/lib/articles";
+
+function hasOnlySafeInlineImages(content: string) {
+  return Array.from(content.matchAll(/!\[[^\]]*]\(([^)]+)\)/g))
+    .every((match) => /^\/image\/\d{6}\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(match[1]));
+}
 
 const articleSchema = z.object({
   title: z.string().trim().min(3).max(180),
   category: z.string().trim().min(2).max(80),
   excerpt: z.string().trim().min(20).max(500),
-  content: z.string().trim().min(50),
+  content: z.string().trim().min(50).refine(hasOnlySafeInlineImages),
   coverImageUrl: z.string().regex(/^\/image\/\d{6}\/[a-z0-9]+(?:-[a-z0-9]+)*$/),
   coverImagePath: z.string().regex(/^\d{6}\/[a-z0-9]+(?:-[a-z0-9]+)*\.webp$/),
   coverImageAlt: z.string().trim().min(3).max(180),
@@ -29,16 +35,8 @@ function formatJakartaDate(date: Date) {
   }).format(date);
 }
 
-function cleanDiscoveryText(value: string) {
-  return value
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/^[-*>]\s+/gm, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 function createGeoSummary(category: string, excerpt: string, content: string) {
-  return cleanDiscoveryText(`${category}: ${excerpt} ${content}`).slice(0, 800).trim();
+  return `${category}: ${excerpt} ${articleContentToPlainText(content)}`.slice(0, 800).trim();
 }
 
 export type ArticleFormState = {

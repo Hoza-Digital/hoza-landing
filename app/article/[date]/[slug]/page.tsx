@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { cache, type ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { ArticleHeader } from "@/components/article-header";
+import { articleContentToPlainText } from "@/lib/article-content";
 import { getPublishedArticle } from "@/lib/articles";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,35 @@ function formatDate(date: string) {
     .format(new Date(`${date}T00:00:00Z`));
 }
 
+function safeArticleLink(href: string) {
+  return /^(https?:\/\/|mailto:|\/|#)/i.test(href) ? href : null;
+}
+
+function renderInlineContent(content: string, keyPrefix: string): ReactNode[] {
+  const pattern = /\*\*([^*]+)\*\*|\*([^*]+)\*|\[([^\]]+)]\(([^)\s]+)\)/g;
+  const nodes: ReactNode[] = [];
+  let cursor = 0;
+
+  for (const match of content.matchAll(pattern)) {
+    const matchIndex = match.index ?? 0;
+    if (matchIndex > cursor) nodes.push(content.slice(cursor, matchIndex));
+    const key = `${keyPrefix}-${matchIndex}`;
+
+    if (match[1]) nodes.push(<strong key={key}>{renderInlineContent(match[1], `${key}-strong`)}</strong>);
+    else if (match[2]) nodes.push(<em key={key}>{renderInlineContent(match[2], `${key}-em`)}</em>);
+    else {
+      const href = safeArticleLink(match[4]);
+      nodes.push(href
+        ? <a key={key} href={href} {...(/^https?:\/\//i.test(href) ? { target: "_blank", rel: "noreferrer noopener" } : {})}>{match[3]}</a>
+        : match[3]);
+    }
+    cursor = matchIndex + match[0].length;
+  }
+
+  if (cursor < content.length) nodes.push(content.slice(cursor));
+  return nodes;
+}
+
 function renderContent(content: string): ReactNode[] {
   const lines = content.replaceAll("\r\n", "\n").split("\n");
   const blocks: ReactNode[] = [];
@@ -37,18 +67,28 @@ function renderContent(content: string): ReactNode[] {
     }
 
     const key = `${index}-${line.slice(0, 24)}`;
+    const imageMatch = line.match(/^!\[([^\]]*)]\((\/image\/\d{6}\/[a-z0-9]+(?:-[a-z0-9]+)*)\)$/);
+    if (imageMatch) {
+      blocks.push(
+        <figure className="article-inline-image" key={key}>
+          <Image src={imageMatch[2]} alt={imageMatch[1]} width={1600} height={900} sizes="(max-width: 900px) 100vw, 48rem" />
+        </figure>,
+      );
+      index += 1;
+      continue;
+    }
     if (line.startsWith("### ")) {
-      blocks.push(<h3 key={key}>{line.slice(4)}</h3>);
+      blocks.push(<h3 key={key}>{renderInlineContent(line.slice(4), key)}</h3>);
       index += 1;
       continue;
     }
     if (line.startsWith("## ")) {
-      blocks.push(<h2 key={key}>{line.slice(3)}</h2>);
+      blocks.push(<h2 key={key}>{renderInlineContent(line.slice(3), key)}</h2>);
       index += 1;
       continue;
     }
     if (line.startsWith("> ")) {
-      blocks.push(<blockquote key={key}>{line.slice(2)}</blockquote>);
+      blocks.push(<blockquote key={key}>{renderInlineContent(line.slice(2), key)}</blockquote>);
       index += 1;
       continue;
     }
@@ -58,17 +98,26 @@ function renderContent(content: string): ReactNode[] {
         items.push(lines[index].trim().slice(2));
         index += 1;
       }
-      blocks.push(<ul key={key}>{items.map((item, itemIndex) => <li key={`${itemIndex}-${item}`}>{item}</li>)}</ul>);
+      blocks.push(<ul key={key}>{items.map((item, itemIndex) => <li key={`${itemIndex}-${item}`}>{renderInlineContent(item, `${key}-${itemIndex}`)}</li>)}</ul>);
+      continue;
+    }
+    if (/^\d+\.\s/.test(line)) {
+      const items: string[] = [];
+      while (index < lines.length && /^\d+\.\s/.test(lines[index].trim())) {
+        items.push(lines[index].trim().replace(/^\d+\.\s+/, ""));
+        index += 1;
+      }
+      blocks.push(<ol key={key}>{items.map((item, itemIndex) => <li key={`${itemIndex}-${item}`}>{renderInlineContent(item, `${key}-${itemIndex}`)}</li>)}</ol>);
       continue;
     }
 
     const paragraph = [line];
     index += 1;
-    while (index < lines.length && lines[index].trim() && !/^(## |### |> |- )/.test(lines[index].trim())) {
+    while (index < lines.length && lines[index].trim() && !/^(## |### |> |- |\d+\.\s)/.test(lines[index].trim())) {
       paragraph.push(lines[index].trim());
       index += 1;
     }
-    blocks.push(<p key={key}>{paragraph.join(" ")}</p>);
+    blocks.push(<p key={key}>{renderInlineContent(paragraph.join(" "), key)}</p>);
   }
 
   return blocks;
@@ -115,6 +164,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
 
   const canonical = `${siteUrl}/article/${date}/${article.slug}`;
   const coverImageUrl = absoluteUrl(article.coverImageUrl);
+  const articleBody = articleContentToPlainText(article.content);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -128,6 +178,8 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     author: { "@type": "Organization", name: article.authorName },
     publisher: { "@type": "Organization", name: "Hoza Digital", url: siteUrl },
     about: article.geoSummary || article.excerpt,
+    articleBody,
+    wordCount: articleBody ? articleBody.split(/\s+/).length : 0,
   };
 
   return (

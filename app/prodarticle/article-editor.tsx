@@ -10,6 +10,7 @@ import {
   GalleryHorizontal,
   ImagePlus,
   LoaderCircle,
+  Search,
   Sparkles,
   X,
 } from "lucide-react";
@@ -21,17 +22,16 @@ import {
   slugifyArticleTitle,
 } from "@/lib/articles";
 import { type ArticleFormState, publishArticle } from "./actions";
+import {
+  type CompressedImage,
+  MAX_IMAGE_BYTES,
+  compressToWebp,
+  formatBytes,
+  uploadArticleImage,
+} from "./image-processing";
+import { RichTextEditor } from "./rich-text-editor";
 
-const MAX_IMAGE_BYTES = 1024 * 1024;
-const TARGET_IMAGE_BYTES = 940 * 1024;
 const initialArticleFormState: ArticleFormState = { status: "idle", message: "" };
-
-type CompressedImage = {
-  blob: Blob;
-  width: number;
-  height: number;
-  originalName: string;
-};
 
 type ArticleEditorProps = {
   initialImages: ArticleImage[];
@@ -40,58 +40,6 @@ type ArticleEditorProps = {
   defaultDraftDate: string;
   defaultDraftTime: string;
 };
-
-function canvasToBlob(canvas: HTMLCanvasElement, quality: number) {
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob || blob.type !== "image/webp") reject(new Error("This browser could not create a WebP image."));
-      else resolve(blob);
-    }, "image/webp", quality);
-  });
-}
-
-async function compressToWebp(file: File): Promise<CompressedImage> {
-  const bitmap = await createImageBitmap(file);
-  const initialScale = Math.min(1, 1920 / bitmap.width, 1280 / bitmap.height);
-  let width = Math.max(1, Math.round(bitmap.width * initialScale));
-  let height = Math.max(1, Math.round(bitmap.height * initialScale));
-
-  try {
-    for (let resizeAttempt = 0; resizeAttempt < 6; resizeAttempt += 1) {
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const context = canvas.getContext("2d", { alpha: false });
-      if (!context) throw new Error("The image editor is not available in this browser.");
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = "high";
-      context.drawImage(bitmap, 0, 0, width, height);
-
-      for (const quality of [.88, .8, .72, .64, .56]) {
-        const blob = await canvasToBlob(canvas, quality);
-        if (blob.size <= TARGET_IMAGE_BYTES) {
-          return {
-            blob,
-            width,
-            height,
-            originalName: `${file.name.replace(/\.[^.]+$/, "") || "article-image"}.webp`,
-          };
-        }
-      }
-
-      width = Math.max(1, Math.round(width * .84));
-      height = Math.max(1, Math.round(height * .84));
-    }
-  } finally {
-    bitmap.close();
-  }
-
-  throw new Error("The image could not be reduced below 1 MB. Try a simpler or smaller source image.");
-}
-
-function formatBytes(bytes: number) {
-  return bytes < 1024 * 1024 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
 
 function formatArticleDate(date: string) {
   return new Intl.DateTimeFormat("en", { day: "2-digit", month: "short", year: "numeric" })
@@ -109,6 +57,7 @@ export function ArticleEditor({
   const [images, setImages] = useState(initialImages);
   const [selectedImage, setSelectedImage] = useState<ArticleImage | null>(initialImages[0] ?? null);
   const [sourceMode, setSourceMode] = useState<"upload" | "gallery">(initialImages.length ? "gallery" : "upload");
+  const [galleryQuery, setGalleryQuery] = useState("");
   const [compressed, setCompressed] = useState<CompressedImage | null>(null);
   const [imageState, setImageState] = useState<"idle" | "compressing" | "ready" | "uploading" | "error">("idle");
   const [imageMessage, setImageMessage] = useState("");
@@ -124,6 +73,11 @@ export function ArticleEditor({
   const pathDate = workflow === "published" ? defaultPublishDate : publishDate;
   const pathPreview = `/article/${articleDateCode(pathDate)}/${slug || "your-article-title"}`;
   const previewUrl = useMemo(() => compressed ? URL.createObjectURL(compressed.blob) : "", [compressed]);
+  const filteredImages = useMemo(() => {
+    const query = galleryQuery.trim().toLocaleLowerCase();
+    if (!query) return images;
+    return images.filter((image) => `${image.originalName} ${image.altText}`.toLocaleLowerCase().includes(query));
+  }, [galleryQuery, images]);
 
   useEffect(() => {
     return () => {
@@ -176,19 +130,7 @@ export function ArticleEditor({
     setImageMessage("Uploading the optimized image to the gallery…");
 
     try {
-      const response = await fetch("/api/admin/article-image", {
-        method: "POST",
-        headers: {
-          "Content-Type": "image/webp",
-          "x-file-name": encodeURIComponent(compressed.originalName),
-          "x-image-alt": encodeURIComponent(savedAltText),
-          "x-image-width": String(compressed.width),
-          "x-image-height": String(compressed.height),
-        },
-        body: compressed.blob,
-      });
-      const result = await response.json() as ArticleImage & { error?: string };
-      if (!response.ok) throw new Error(result.error || "The image could not be uploaded.");
+      const result = await uploadArticleImage(compressed, savedAltText);
 
       setImages((current) => [result, ...current.filter((item) => item.id !== result.id)]);
       setSelectedImage(result);
@@ -280,30 +222,44 @@ export function ArticleEditor({
               </div>
             </div>
           ) : (
-            <div className="prod-gallery" role="tabpanel">
-              {images.map((image) => (
-                <button
-                  type="button"
-                  className={selectedImage?.id === image.id ? "is-selected" : ""}
-                  onClick={() => selectGalleryImage(image)}
-                  key={image.id}
-                  aria-label={`Select ${image.originalName}. ${image.altText}`}
-                >
-                  <span className="prod-gallery-image">
-                    <Image src={image.publicUrl} alt="" fill sizes="(max-width: 720px) 50vw, 20vw" />
-                    <span className="prod-gallery-alt">{image.altText}</span>
-                  </span>
-                  <span className="prod-gallery-meta"><strong>{image.originalName}</strong><small>{formatBytes(image.sizeBytes)} · {image.width} × {image.height}</small></span>
-                  {selectedImage?.id === image.id && <i><Check aria-hidden="true" /></i>}
-                </button>
-              ))}
-              {!images.length && (
-                <div className="prod-gallery-empty">
-                  <GalleryHorizontal aria-hidden="true" />
-                  <strong>Your gallery is ready for its first image.</strong>
-                  <button type="button" onClick={() => setSourceMode("upload")}>Upload an image</button>
-                </div>
-              )}
+            <div className="prod-gallery-panel" role="tabpanel">
+              <label className="prod-gallery-search">
+                <Search aria-hidden="true" />
+                <input value={galleryQuery} onChange={(event) => setGalleryQuery(event.target.value)} placeholder="Search filename or image description" aria-label="Search cover image gallery" />
+                <span>{filteredImages.length} / {images.length}</span>
+              </label>
+              <div className="prod-gallery">
+                {filteredImages.map((image) => (
+                  <button
+                    type="button"
+                    className={selectedImage?.id === image.id ? "is-selected" : ""}
+                    onClick={() => selectGalleryImage(image)}
+                    key={image.id}
+                    aria-label={`Select ${image.originalName}. ${image.altText}`}
+                  >
+                    <span className="prod-gallery-image">
+                      <Image src={image.publicUrl} alt="" fill sizes="(max-width: 720px) 50vw, 20vw" />
+                      <span className="prod-gallery-alt">{image.altText}</span>
+                    </span>
+                    <span className="prod-gallery-meta"><strong>{image.originalName}</strong><small>{formatBytes(image.sizeBytes)} · {image.width} × {image.height}</small></span>
+                    {selectedImage?.id === image.id && <i><Check aria-hidden="true" /></i>}
+                  </button>
+                ))}
+                {!images.length && (
+                  <div className="prod-gallery-empty">
+                    <GalleryHorizontal aria-hidden="true" />
+                    <strong>Your gallery is ready for its first image.</strong>
+                    <button type="button" onClick={() => setSourceMode("upload")}>Upload an image</button>
+                  </div>
+                )}
+                {images.length > 0 && !filteredImages.length && (
+                  <div className="prod-gallery-empty">
+                    <Search aria-hidden="true" />
+                    <strong>No images match “{galleryQuery.trim()}”.</strong>
+                    <button type="button" onClick={() => setGalleryQuery("")}>Clear search</button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -362,11 +318,14 @@ export function ArticleEditor({
               <span>Short excerpt *</span>
               <textarea name="excerpt" required minLength={20} maxLength={500} rows={3} placeholder="A concise summary shown on the article card and near the article heading." />
             </label>
-            <label className="prod-field prod-field-wide">
-              <span>Main content *</span>
-              <textarea name="content" required minLength={50} rows={18} placeholder={"Write the article in clear paragraphs.\n\n## Use this for a section heading\n### Use this for a smaller heading\n- Use hyphens for a list\n> Use this for an important quote"} />
-              <small>Formatting supported: <strong>## heading</strong>, <strong>### subheading</strong>, <strong>- list</strong> and <strong>&gt; quote</strong>.</small>
-            </label>
+            <div className="prod-field prod-field-wide">
+              <span id="main-content-label">Main content *</span>
+              <RichTextEditor
+                images={images}
+                name="content"
+                onImageUploaded={(image) => setImages((current) => [image, ...current.filter((item) => item.id !== image.id)])}
+              />
+            </div>
           </div>
         </section>
 
