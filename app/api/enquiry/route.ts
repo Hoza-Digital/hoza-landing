@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const enquiryId = createEnquiry(parsed.data);
+    const enquiryId = await createEnquiry(parsed.data);
     const webhook = process.env.CRM_WEBHOOK_URL;
     if (webhook) {
       const response = await fetch(webhook, {

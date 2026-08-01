@@ -25,6 +25,6 @@ export async function changeEnquiryStatus(formData: FormData) {
   });
   if (!parsed.success) return;
 
-  updateEnquiryStatus(parsed.data.id, parsed.data.status);
+  await updateEnquiryStatus(parsed.data.id, parsed.data.status);
   revalidatePath("/admin");
 }

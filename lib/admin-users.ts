@@ -1,5 +1,5 @@
 import { scryptSync, timingSafeEqual } from "node:crypto";
-import { getDatabase } from "./database";
+import { callSupabaseRpc } from "./supabase";
 
 export type AdminIdentity = {
   id: number;
@@ -7,38 +7,39 @@ export type AdminIdentity = {
 };
 
 type AdminUserRow = {
-  id: number;
+  id: number | string;
   email: string;
   password_hash: string;
-  active: number;
+  active: boolean;
 };
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
-function findAdminByEmail(email: string) {
-  return getDatabase()
-    .prepare(`
-      SELECT id, email, password_hash, active
-      FROM admin_users
-      WHERE email = ? COLLATE NOCASE
-      LIMIT 1
-    `)
-    .get(normalizeEmail(email)) as unknown as AdminUserRow | undefined;
+async function findAdminByEmail(email: string) {
+  const rows = await callSupabaseRpc<AdminUserRow[]>("hoza_admin_get_user_by_email", {
+    p_email: normalizeEmail(email),
+  });
+  return rows[0];
 }
 
-export function getActiveAdminById(id: number): AdminIdentity | null {
-  const row = getDatabase()
-    .prepare("SELECT id, email FROM admin_users WHERE id = ? AND active = 1 LIMIT 1")
-    .get(id) as unknown as Pick<AdminUserRow, "id" | "email"> | undefined;
+export async function getActiveAdminById(id: number): Promise<AdminIdentity | null> {
+  const rows = await callSupabaseRpc<Array<Pick<AdminUserRow, "id" | "email" | "active">>>(
+    "hoza_admin_get_user_by_id",
+    { p_id: id },
+  );
+  const row = rows[0];
 
-  return row ? { id: Number(row.id), email: row.email } : null;
+  return row?.active ? { id: Number(row.id), email: row.email } : null;
 }
 
-export function verifyAdminCredentials(email: string, password: string): AdminIdentity | null {
-  const user = findAdminByEmail(email);
-  if (!user || user.active !== 1) return null;
+export async function verifyAdminCredentials(
+  email: string,
+  password: string,
+): Promise<AdminIdentity | null> {
+  const user = await findAdminByEmail(email);
+  if (!user?.active) return null;
 
   const [algorithm, encodedSalt, encodedHash] = user.password_hash.split("$");
   if (algorithm !== "scrypt" || !encodedSalt || !encodedHash) return null;

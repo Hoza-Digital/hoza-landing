@@ -12,8 +12,10 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboardPage() {
   if (!(await isAdminAuthenticated())) redirect("/admlog");
 
-  const enquiries = listEnquiries();
-  const stats = getEnquiryStats();
+  const [enquiries, stats] = await Promise.all([
+    listEnquiries(),
+    getEnquiryStats(),
+  ]);
 
   return (
     <main className="admin-dashboard">

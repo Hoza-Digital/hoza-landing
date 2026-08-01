@@ -19,9 +19,20 @@ npm run lint
 npm run build
 ```
 
-## Enquiry integration
+## Supabase backend
 
-The form posts to `app/api/enquiry/route.ts`. It validates input and is ready for a CRM/webhook integration. Add `CRM_WEBHOOK_URL` and replace the marked integration block with your provider-specific payload/signature handling.
+The enquiry form and admin dashboard use Supabase Postgres through server-only RPC calls. Apply `supabase/migrations/20260801061500_hoza_backend.sql`, then copy `.env.example` to `.env.local` and configure:
+
+```bash
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_replace-me
+SUPABASE_BACKEND_SECRET=replace-with-a-long-random-server-secret
+ADMIN_SESSION_SECRET=replace-with-at-least-32-random-characters
+```
+
+Keep `.env.local` private. To add or rotate an administrator, provide `ADMIN_EMAIL_INPUT` and `ADMIN_PASSWORD_INPUT`, then run `npm run admin:upsert`.
+
+The form posts to `app/api/enquiry/route.ts`. Set `CRM_WEBHOOK_URL` if each validated enquiry should also be forwarded to an external CRM.
 
 ## Brand/contact configuration
 
