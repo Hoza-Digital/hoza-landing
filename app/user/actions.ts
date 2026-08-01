@@ -19,7 +19,13 @@ import {
 const createUserSchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: z.string().trim().email().max(254),
-  password: z.string().min(8).max(128),
+  password: z.string()
+    .min(8)
+    .max(128)
+    .regex(/[A-Z]/)
+    .regex(/[a-z]/)
+    .regex(/[A-Za-z]/)
+    .regex(/[^A-Za-z0-9\s]/),
   role: z.enum(ADMIN_ROLES),
 });
 
@@ -48,7 +54,10 @@ export async function createUser(
     role: formData.get("role"),
   });
   if (!parsed.success || !creatableRoles(admin.role).includes(parsed.data.role)) {
-    return { status: "error", message: "Check the name, email, password and permitted role. Passwords require at least 8 characters." };
+    return {
+      status: "error",
+      message: "Check the name, email, role and password. Passwords require at least 8 characters, one uppercase letter, one lowercase letter and one special character.",
+    };
   }
 
   try {
