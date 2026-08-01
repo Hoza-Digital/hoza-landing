@@ -281,9 +281,10 @@
 .admin-brand > span { padding-left: 1rem; border-left: 1px solid var(--line); color: var(--muted); font-size: .56rem; letter-spacing: .12em; }
 
 .admin-menu {
-  position: relative;
-  z-index: 30;
-  justify-self: end;
+  position: fixed;
+  top: 1.3rem;
+  right: clamp(1rem, 4vw, 4rem);
+  z-index: 50;
 }
 
 .admin-menu summary {
