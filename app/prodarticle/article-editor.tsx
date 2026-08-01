@@ -11,6 +11,7 @@ import {
   ImagePlus,
   LoaderCircle,
   Sparkles,
+  X,
 } from "lucide-react";
 import {
   articleDateCode,
@@ -218,7 +219,11 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
         <input type="hidden" name="coverImagePath" value={selectedImage?.storagePath ?? ""} />
         <input type="hidden" name="coverImageAlt" value={coverAlt} />
 
-        <section className="prod-panel prod-image-panel" aria-labelledby="cover-heading">
+          <div id="cover-image-menu" className="prod-image-modal-backdrop" popover="auto">
+          <section className="prod-panel prod-image-panel prod-image-modal" role="dialog" aria-modal="true" aria-labelledby="cover-heading">
+          <button type="button" className="prod-image-modal-close" popoverTarget="cover-image-menu" popoverTargetAction="hide" aria-label="Close cover image menu">
+            <X aria-hidden="true" />
+          </button>
           <header className="prod-panel-heading">
             <div><span>01</span><h2 id="cover-heading">Cover image</h2></div>
             <p>WebP only · maximum 1 MB · stored in the server image library</p>
@@ -290,7 +295,8 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
             </div>
           )}
 
-        </section>
+          </section>
+          </div>
 
         <section className="prod-panel" aria-labelledby="story-heading">
           <header className="prod-panel-heading">
@@ -304,6 +310,27 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
               <input name="title" value={title} onChange={(event) => onTitleChange(event.target.value)} required minLength={3} maxLength={180} placeholder="A clear, useful title people will want to open" />
               <small>URL preview: <strong>{pathPreview}</strong></small>
             </label>
+            <div className="prod-cover-field prod-field-wide">
+              <span>Cover image *</span>
+              <button
+                type="button"
+                className={selectedImage ? "has-image" : ""}
+                aria-haspopup="dialog"
+                popoverTarget="cover-image-menu"
+                popoverTargetAction="toggle"
+              >
+                {selectedImage ? (
+                  <Image src={selectedImage.publicUrl} alt="" width={82} height={56} />
+                ) : (
+                  <i><ImagePlus aria-hidden="true" /></i>
+                )}
+                <span>
+                  <strong>{selectedImage ? "Change cover image" : "Choose cover image"}</strong>
+                  <small>{selectedImage ? `${selectedImage.originalName} · ${formatBytes(selectedImage.sizeBytes)}` : "Upload a new image or choose one from the gallery"}</small>
+                </span>
+                <ArrowUpRight aria-hidden="true" />
+              </button>
+            </div>
             <label className="prod-field">
               <span>Category *</span>
               <input name="category" required minLength={2} maxLength={80} list="article-categories" placeholder="Product strategy" />
