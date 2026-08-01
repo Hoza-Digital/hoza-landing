@@ -17,7 +17,17 @@ const articleSchema = z.object({
   authorName: z.string().trim().min(2).max(80),
   status: z.enum(ARTICLE_STATUSES),
   publishDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  publishTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).nullable(),
 });
+
+function formatJakartaDate(date: Date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Jakarta",
+  }).format(date);
+}
 
 function cleanDiscoveryText(value: string) {
   return value
@@ -44,6 +54,8 @@ export async function publishArticle(
 ): Promise<ArticleFormState> {
   if (!(await isAdminAuthenticated())) redirect("/admlog");
 
+  const submittedStatus = formData.get("status");
+  const isDraft = submittedStatus === "draft";
   const parsed = articleSchema.safeParse({
     title: formData.get("title"),
     category: formData.get("category"),
@@ -53,8 +65,9 @@ export async function publishArticle(
     coverImagePath: formData.get("coverImagePath"),
     coverImageAlt: formData.get("coverImageAlt"),
     authorName: formData.get("authorName"),
-    status: formData.get("status"),
-    publishDate: formData.get("publishDate"),
+    status: submittedStatus,
+    publishDate: isDraft ? formData.get("publishDate") : formatJakartaDate(new Date()),
+    publishTime: isDraft ? formData.get("publishTime") : null,
   });
 
   if (!parsed.success) {
@@ -67,10 +80,24 @@ export async function publishArticle(
   const slug = slugifyArticleTitle(parsed.data.title);
   if (!slug) return { status: "error", message: "The title needs letters or numbers to create a URL." };
 
+  let scheduledFor: string | null = null;
+  if (parsed.data.status === "draft") {
+    if (!parsed.data.publishTime) {
+      return { status: "error", message: "Choose a publication date and time for the draft." };
+    }
+
+    const scheduledDate = new Date(`${parsed.data.publishDate}T${parsed.data.publishTime}:00+07:00`);
+    if (Number.isNaN(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now()) {
+      return { status: "error", message: "Choose a future publication date and time in WIB." };
+    }
+    scheduledFor = scheduledDate.toISOString();
+  }
+
   try {
     const result = await createArticle({
       ...parsed.data,
       slug,
+      scheduledFor,
       seoTitle: parsed.data.title,
       seoDescription: parsed.data.excerpt.slice(0, 320),
       geoSummary: createGeoSummary(parsed.data.category, parsed.data.excerpt, parsed.data.content),
@@ -84,7 +111,7 @@ export async function publishArticle(
       status: "success",
       message: result.status === "published"
         ? "Article published. The public page is ready."
-        : "Draft saved. It will remain private until published.",
+        : "Draft saved with its target publication date and time. It will remain private until published.",
       path: result.path,
       articleStatus: result.status,
     };

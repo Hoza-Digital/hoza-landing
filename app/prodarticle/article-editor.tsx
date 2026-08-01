@@ -16,6 +16,7 @@ import {
 import {
   articleDateCode,
   type ArticleImage,
+  type ArticleStatus,
   type ArticleSummary,
   slugifyArticleTitle,
 } from "@/lib/articles";
@@ -36,6 +37,8 @@ type ArticleEditorProps = {
   initialImages: ArticleImage[];
   articles: ArticleSummary[];
   defaultPublishDate: string;
+  defaultDraftDate: string;
+  defaultDraftTime: string;
 };
 
 function canvasToBlob(canvas: HTMLCanvasElement, quality: number) {
@@ -95,7 +98,13 @@ function formatArticleDate(date: string) {
     .format(new Date(`${date}T00:00:00Z`));
 }
 
-export function ArticleEditor({ initialImages, articles, defaultPublishDate }: ArticleEditorProps) {
+export function ArticleEditor({
+  initialImages,
+  articles,
+  defaultPublishDate,
+  defaultDraftDate,
+  defaultDraftTime,
+}: ArticleEditorProps) {
   const [formState, formAction, formPending] = useActionState(publishArticle, initialArticleFormState);
   const [images, setImages] = useState(initialImages);
   const [selectedImage, setSelectedImage] = useState<ArticleImage | null>(initialImages[0] ?? null);
@@ -106,11 +115,14 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
   const [title, setTitle] = useState("");
   const [coverAlt, setCoverAlt] = useState(initialImages[0]?.altText ?? "");
   const [coverAltCustomized, setCoverAltCustomized] = useState(Boolean(initialImages[0]));
-  const [publishDate, setPublishDate] = useState(defaultPublishDate);
+  const [workflow, setWorkflow] = useState<ArticleStatus>("published");
+  const [publishDate, setPublishDate] = useState(defaultDraftDate);
+  const [publishTime, setPublishTime] = useState(defaultDraftTime);
   const resultRef = useRef<HTMLDivElement>(null);
 
   const slug = useMemo(() => slugifyArticleTitle(title), [title]);
-  const pathPreview = `/article/${articleDateCode(publishDate)}/${slug || "your-article-title"}`;
+  const pathDate = workflow === "published" ? defaultPublishDate : publishDate;
+  const pathPreview = `/article/${articleDateCode(pathDate)}/${slug || "your-article-title"}`;
   const previewUrl = useMemo(() => compressed ? URL.createObjectURL(compressed.blob) : "", [compressed]);
 
   useEffect(() => {
@@ -359,18 +371,26 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
         </section>
 
         <section className="prod-publish-bar">
-          <div>
-            <label className="prod-field compact">
-              <span>Publish date *</span>
-              <input type="date" name="publishDate" value={publishDate} onChange={(event) => setPublishDate(event.target.value)} required />
-            </label>
+          <div className={`prod-publish-controls${workflow === "draft" ? " has-schedule" : ""}`}>
             <label className="prod-field compact">
               <span>Workflow *</span>
-              <select name="status" defaultValue="published">
+              <select name="status" value={workflow} onChange={(event) => setWorkflow(event.target.value as ArticleStatus)}>
                 <option value="published">Publish now</option>
                 <option value="draft">Save as draft</option>
               </select>
             </label>
+            {workflow === "draft" && (
+              <>
+                <label className="prod-field compact">
+                  <span>Publish date *</span>
+                  <input type="date" name="publishDate" value={publishDate} onChange={(event) => setPublishDate(event.target.value)} required />
+                </label>
+                <label className="prod-field compact">
+                  <span>Publish time (WIB) *</span>
+                  <input type="time" name="publishTime" value={publishTime} onChange={(event) => setPublishTime(event.target.value)} required />
+                </label>
+              </>
+            )}
           </div>
           <div className="prod-publish-action">
             <span>{selectedImage ? `Cover selected · ${formatBytes(selectedImage.sizeBytes)}` : "Select or upload a cover before saving"}</span>
