@@ -263,6 +263,13 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
               )}
             </div>
           )}
+
+          <div className="prod-fields prod-image-alt">
+            <label className="prod-field">
+              <span>Cover image alt text *</span>
+              <input name="coverImageAlt" value={coverAlt} onChange={(event) => { setCoverAltCustomized(true); setCoverAlt(event.target.value); }} required minLength={3} maxLength={180} placeholder="Describe what is visible in the image" />
+            </label>
+          </div>
         </section>
 
         <section className="prod-panel" aria-labelledby="story-heading">
@@ -300,10 +307,6 @@ export function ArticleEditor({ initialImages, articles, defaultPublishDate }: A
               <span>Main content *</span>
               <textarea name="content" required minLength={50} rows={18} placeholder={"Write the article in clear paragraphs.\n\n## Use this for a section heading\n### Use this for a smaller heading\n- Use hyphens for a list\n> Use this for an important quote"} />
               <small>Formatting supported: <strong>## heading</strong>, <strong>### subheading</strong>, <strong>- list</strong> and <strong>&gt; quote</strong>.</small>
-            </label>
-            <label className="prod-field prod-field-wide">
-              <span>Cover image alt text *</span>
-              <input name="coverImageAlt" value={coverAlt} onChange={(event) => { setCoverAltCustomized(true); setCoverAlt(event.target.value); }} required minLength={3} maxLength={180} placeholder="Describe what is visible in the image" />
             </label>
           </div>
         </section>
