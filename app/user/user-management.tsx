@@ -65,8 +65,10 @@ function isEmailFormat(value: string) {
 export function UserManagement({ users, creatableRoleOptions }: UserManagementProps) {
   const [state, formAction, pending] = useActionState(createUser, initialState);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState({
@@ -83,10 +85,15 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
     { key: "alphabet", label: "At least 1 alphabetic character", met: /[A-Za-z]/.test(password) },
     { key: "special", label: "At least 1 special character", met: /[^A-Za-z0-9\s]/.test(password) },
   ];
+  const nameIsValid = name.trim().length >= 2;
   const passwordIsValid = passwordChecks.every((check) => check.met);
 
-  const flashInvalidField = (field: "email" | "password") => {
-    const input = field === "email" ? emailInputRef.current : passwordInputRef.current;
+  const flashInvalidField = (field: "name" | "email" | "password") => {
+    const input = {
+      name: nameInputRef.current,
+      email: emailInputRef.current,
+      password: passwordInputRef.current,
+    }[field];
     if (!input) return;
     input.classList.remove("is-invalid-flash");
     void input.offsetWidth;
@@ -94,15 +101,16 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
     window.setTimeout(() => input.classList.remove("is-invalid-flash"), 1150);
   };
 
-  const validateCredentials = () => {
+  const validateUserFields = () => {
     const emailIsValid = isEmailFormat(email);
+    if (!nameIsValid) flashInvalidField("name");
     if (!emailIsValid) flashInvalidField("email");
     if (!passwordIsValid) flashInvalidField("password");
-    return emailIsValid && passwordIsValid;
+    return nameIsValid && emailIsValid && passwordIsValid;
   };
 
   const handleCreateSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (!validateCredentials()) event.preventDefault();
+    if (!validateUserFields()) event.preventDefault();
   };
 
   const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -152,7 +160,22 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
         <form action={formAction} className="user-create-form" onSubmit={handleCreateSubmit}>
           <label>
             <span>Name *</span>
-            <input name="name" minLength={2} maxLength={100} required placeholder="Full name" autoComplete="name" />
+            <input
+              ref={nameInputRef}
+              name="name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              onInvalid={(event) => {
+                event.preventDefault();
+                flashInvalidField("name");
+              }}
+              minLength={2}
+              maxLength={100}
+              required
+              placeholder="Full name"
+              autoComplete="name"
+              aria-invalid={name.length > 0 && !nameIsValid}
+            />
           </label>
           <label>
             <span>Username (email) *</span>
@@ -254,7 +277,7 @@ export function UserManagement({ users, creatableRoleOptions }: UserManagementPr
             type="submit"
             className="user-create-button"
             disabled={pending || avatar.status === "processing"}
-            onClick={() => void validateCredentials()}
+            onClick={() => void validateUserFields()}
           >
             {pending ? <LoaderCircle className="admin-spin" aria-hidden="true" /> : <ArrowUpRight aria-hidden="true" />}
             {pending ? "Creating user…" : "Create user"}
