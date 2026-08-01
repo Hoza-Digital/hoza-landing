@@ -143,6 +143,7 @@
 .prod-gallery-empty button { padding: .7rem 1rem; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--accent-wash); color: var(--text); cursor: pointer; }
 
 .prod-fields { display: grid; gap: 1.1rem; padding: 1.5rem; }
+.prod-image-alt { border-top: 1px solid var(--line); }
 .prod-fields.two-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .prod-field { display: grid; gap: .55rem; }
 .prod-field-wide { grid-column: 1 / -1; }
