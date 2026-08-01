@@ -26,6 +26,7 @@ const createUserSchema = z.object({
     .regex(/[A-Z]/)
     .regex(/[a-z]/)
     .regex(/[A-Za-z]/)
+    .regex(/[0-9]/)
     .regex(/[^A-Za-z0-9\s]/),
   role: z.enum(ADMIN_ROLES),
   avatarData: z.string().max(300_000),
@@ -90,7 +91,7 @@ export async function createUser(
   if (!parsed.success || !creatableRoles(admin.role).includes(parsed.data.role)) {
     return {
       status: "error",
-      message: "Check the name, email, role and password. Passwords require at least 8 characters, one uppercase letter, one lowercase letter and one special character.",
+      message: "Check the name, email, role and password. Passwords require at least 8 characters, one uppercase letter, one lowercase letter, one numeric character and one special character.",
     };
   }
 
