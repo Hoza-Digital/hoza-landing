@@ -1,4 +1,4 @@
-import { getDatabase } from "./database";
+import { callSupabaseRpc } from "./supabase";
 
 export const ENQUIRY_STATUSES = ["new", "reviewing", "contacted", "archived"] as const;
 
@@ -30,7 +30,7 @@ export type EnquiryStats = {
 };
 
 type EnquiryRow = NewEnquiry & {
-  id: number;
+  id: number | string;
   status: EnquiryStatus;
   created_at: string;
 };
@@ -42,55 +42,32 @@ type StatsRow = {
   services: number;
 };
 
-export function createEnquiry(enquiry: NewEnquiry) {
-  const result = getDatabase()
-    .prepare(`
-      INSERT INTO enquiries (
-        name, company, email, whatsapp, country, service,
-        description, budget, timeline, status, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?)
-    `)
-    .run(
-      enquiry.name,
-      enquiry.company,
-      enquiry.email,
-      enquiry.whatsapp,
-      enquiry.country,
-      enquiry.service,
-      enquiry.description,
-      enquiry.budget,
-      enquiry.timeline,
-      new Date().toISOString(),
-    );
-
-  return Number(result.lastInsertRowid);
+export async function createEnquiry(enquiry: NewEnquiry) {
+  return await callSupabaseRpc<number>("hoza_create_enquiry", {
+    p_name: enquiry.name,
+    p_company: enquiry.company,
+    p_email: enquiry.email,
+    p_whatsapp: enquiry.whatsapp,
+    p_country: enquiry.country,
+    p_service: enquiry.service,
+    p_description: enquiry.description,
+    p_budget: enquiry.budget,
+    p_timeline: enquiry.timeline,
+  });
 }
 
-export function listEnquiries(): Enquiry[] {
-  const rows = getDatabase()
-    .prepare(`
-      SELECT id, name, company, email, whatsapp, country, service,
-             description, budget, timeline, status, created_at
-      FROM enquiries
-      ORDER BY created_at DESC
-      LIMIT 500
-    `)
-    .all() as unknown as EnquiryRow[];
+export async function listEnquiries(): Promise<Enquiry[]> {
+  const rows = await callSupabaseRpc<EnquiryRow[]>("hoza_admin_list_enquiries");
 
-  return rows.map(({ created_at: createdAt, ...row }) => ({ ...row, createdAt }));
+  return rows.map(({ created_at: createdAt, id, ...row }) => ({
+    ...row,
+    id: Number(id),
+    createdAt,
+  }));
 }
 
-export function getEnquiryStats(): EnquiryStats {
-  const row = getDatabase()
-    .prepare(`
-      SELECT
-        COUNT(*) AS total,
-        COALESCE(SUM(status = 'new'), 0) AS fresh,
-        COALESCE(SUM(created_at >= datetime('now', '-30 days')), 0) AS recent,
-        COUNT(DISTINCT service) AS services
-      FROM enquiries
-    `)
-    .get() as unknown as StatsRow;
+export async function getEnquiryStats(): Promise<EnquiryStats> {
+  const row = await callSupabaseRpc<StatsRow>("hoza_admin_enquiry_stats");
 
   return {
     total: Number(row.total),
@@ -100,8 +77,9 @@ export function getEnquiryStats(): EnquiryStats {
   };
 }
 
-export function updateEnquiryStatus(id: number, status: EnquiryStatus) {
-  getDatabase()
-    .prepare("UPDATE enquiries SET status = ? WHERE id = ?")
-    .run(status, id);
+export async function updateEnquiryStatus(id: number, status: EnquiryStatus) {
+  await callSupabaseRpc<void>("hoza_admin_update_enquiry_status", {
+    p_id: id,
+    p_status: status,
+  });
 }

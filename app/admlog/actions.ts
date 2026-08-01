@@ -27,7 +27,7 @@ export async function loginAdmin(
   }
 
   try {
-    const admin = authenticateAdmin(parsed.data.email, parsed.data.password);
+    const admin = await authenticateAdmin(parsed.data.email, parsed.data.password);
     if (!admin) {
       return { error: "The credentials do not match our records." };
     }
