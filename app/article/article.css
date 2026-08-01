@@ -11,6 +11,9 @@
   color: var(--text);
 }
 
+.article-site-nav .desktop-nav a.is-current { color: var(--text); }
+.article-site-nav .desktop-nav a.is-current::after { transform: scaleX(1); transform-origin: left; }
+
 .article-header {
   position: sticky;
   z-index: 100;
