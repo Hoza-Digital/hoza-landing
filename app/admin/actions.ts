@@ -27,4 +27,5 @@ export async function changeEnquiryStatus(formData: FormData) {
 
   await updateEnquiryStatus(parsed.data.id, parsed.data.status);
   revalidatePath("/admin");
+  revalidatePath("/projectsignal");
 }
