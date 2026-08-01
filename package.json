@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "admin:upsert": "node --env-file=.env.local scripts/upsert-admin.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },
