@@ -262,9 +262,9 @@
 .prod-field { display: grid; gap: .55rem; }
 .prod-field-wide { grid-column: 1 / -1; }
 .prod-field > span { color: var(--muted); font-size: .62rem; letter-spacing: .09em; text-transform: uppercase; }
-.prod-field input,
-.prod-field textarea,
-.prod-field select {
+.prod-field > input,
+.prod-field > textarea,
+.prod-field > select {
   width: 100%;
   min-height: 3.5rem;
   padding: .85rem 1rem;
@@ -275,14 +275,14 @@
   color: var(--text);
   transition: border-color .2s, box-shadow .2s;
 }
-.prod-field textarea { min-height: auto; resize: vertical; line-height: 1.65; }
-.prod-field input:focus,
-.prod-field textarea:focus,
-.prod-field select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px var(--accent-wash); }
-.prod-field input::placeholder,
-.prod-field textarea::placeholder { color: var(--placeholder); }
-.prod-field small { color: var(--muted); font-size: .59rem; line-height: 1.5; }
-.prod-field small strong { color: var(--lavender); font-weight: 500; overflow-wrap: anywhere; }
+.prod-field > textarea { min-height: auto; resize: vertical; line-height: 1.65; }
+.prod-field > input:focus,
+.prod-field > textarea:focus,
+.prod-field > select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px var(--accent-wash); }
+.prod-field > input::placeholder,
+.prod-field > textarea::placeholder { color: var(--placeholder); }
+.prod-field > small { color: var(--muted); font-size: .59rem; line-height: 1.5; }
+.prod-field > small strong { color: var(--lavender); font-weight: 500; overflow-wrap: anywhere; }
 
 .prod-rich-editor {
   overflow: hidden;
