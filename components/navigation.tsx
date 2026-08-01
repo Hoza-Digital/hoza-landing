@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { openEnquiry, portalTo } from "@/lib/events";
 import { Logo } from "./logo";
@@ -39,7 +40,7 @@ export function Navigation() {
       }
       if (event.key !== "Tab") return;
 
-      const focusable = Array.from(headerRef.current.querySelectorAll<HTMLElement>("button:not([tabindex='-1'])"))
+      const focusable = Array.from(headerRef.current.querySelectorAll<HTMLElement>("a[href], button:not([tabindex='-1'])"))
         .filter((element) => !element.hasAttribute("disabled") && element.getClientRects().length > 0);
       if (!focusable.length) return;
       const first = focusable[0];
@@ -72,6 +73,7 @@ export function Navigation() {
       <button className="nav-logo" onClick={() => go("hero")} aria-label="Go to top" tabIndex={open ? -1 : 0}><Logo decorative /></button>
       <nav className="desktop-nav" aria-label="Primary navigation">
         {links.map(([label, id]) => <button key={id} onClick={() => go(id)}>{label}</button>)}
+        <Link href="/article">Article</Link>
       </nav>
       <div className="nav-actions">
         <button className="nav-cta" onClick={openEnquiry}>Start a Project <span>↗</span></button>
@@ -88,6 +90,9 @@ export function Navigation() {
                 <span>0{index + 1}</span>{label}
               </button>
             ))}
+            <Link href="/article" onClick={() => setOpen(false)}>
+              <span>04</span>Article
+            </Link>
             <button className="mobile-project" onClick={() => { setOpen(false); window.requestAnimationFrame(() => { toggleRef.current?.focus(); openEnquiry(); }); }}>START A PROJECT ↗</button>
             <p>INDONESIA / SINGAPORE / WORLDWIDE</p>
           </div>

@@ -3,7 +3,7 @@ import { Barlow, Barlow_Condensed } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hoza.studio";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hozadigital.com";
 
 const bodyFont = Barlow({
   weight: ["400", "500", "600", "700"],

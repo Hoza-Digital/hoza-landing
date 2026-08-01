@@ -1,6 +1,6 @@
 type RpcArguments = Record<string, string | number | boolean | null>;
 
-function getSupabaseConfig() {
+export function getSupabaseServerConfig() {
   const url = process.env.SUPABASE_URL?.trim().replace(/\/$/, "");
   const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY?.trim();
   const backendSecret = process.env.SUPABASE_BACKEND_SECRET;
@@ -18,7 +18,7 @@ export async function callSupabaseRpc<T>(
   functionName: string,
   arguments_: RpcArguments = {},
 ): Promise<T> {
-  const { url, publishableKey, backendSecret } = getSupabaseConfig();
+  const { url, publishableKey, backendSecret } = getSupabaseServerConfig();
   const response = await fetch(`${url}/rest/v1/rpc/${functionName}`, {
     method: "POST",
     headers: {

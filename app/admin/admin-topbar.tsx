@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FolderKanban, LayoutDashboard, LogOut, Menu } from "lucide-react";
+import { FilePlus2, FolderKanban, LayoutDashboard, LogOut, Menu } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { logoutAdmin } from "./actions";
 
@@ -27,6 +27,10 @@ export function AdminTopbar() {
             <Link href="/projectsignal">
               <FolderKanban aria-hidden="true" />
               Project signals
+            </Link>
+            <Link href="/prodarticle">
+              <FilePlus2 aria-hidden="true" />
+              Produce article
             </Link>
           </nav>
           <form action={logoutAdmin}>
