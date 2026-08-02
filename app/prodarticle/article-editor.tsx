@@ -47,6 +47,12 @@ function formatArticleDate(date: string) {
     .format(new Date(`${date}T00:00:00Z`));
 }
 
+function formatEditableSlug(value: string) {
+  const formatted = slugifyArticleTitle(value);
+  const endsWithSeparator = /[\s-]$/.test(value);
+  return formatted && endsWithSeparator && formatted.length < 160 ? `${formatted}-` : formatted;
+}
+
 export function ArticleEditor({
   initialImages,
   articles,
@@ -64,6 +70,8 @@ export function ArticleEditor({
   const [imageState, setImageState] = useState<"idle" | "compressing" | "ready" | "uploading" | "error">("idle");
   const [imageMessage, setImageMessage] = useState("");
   const [title, setTitle] = useState("");
+  const [editSlug, setEditSlug] = useState(false);
+  const [customSlug, setCustomSlug] = useState("");
   const [coverAlt, setCoverAlt] = useState(initialImages[0]?.altText ?? "");
   const [coverAltCustomized, setCoverAltCustomized] = useState(Boolean(initialImages[0]));
   const [workflow, setWorkflow] = useState<ArticleStatus>("published");
@@ -71,7 +79,8 @@ export function ArticleEditor({
   const [publishTime, setPublishTime] = useState(defaultDraftTime);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  const slug = useMemo(() => slugifyArticleTitle(title), [title]);
+  const automaticSlug = useMemo(() => slugifyArticleTitle(title), [title]);
+  const slug = editSlug ? slugifyArticleTitle(customSlug) : automaticSlug;
   const pathDate = workflow === "published" ? defaultPublishDate : publishDate;
   const pathPreview = `/article/${articleDateCode(pathDate)}/${slug || "your-article-title"}`;
   const previewUrl = useMemo(() => compressed ? URL.createObjectURL(compressed.blob) : "", [compressed]);
@@ -94,6 +103,11 @@ export function ArticleEditor({
   const onTitleChange = (value: string) => {
     setTitle(value);
     if (!coverAltCustomized) setCoverAlt(value ? `${value} — Hoza Digital article cover` : "");
+  };
+
+  const onEditSlugChange = (enabled: boolean) => {
+    setEditSlug(enabled);
+    if (enabled && !customSlug) setCustomSlug(automaticSlug);
   };
 
   const onFileSelected = async (file?: File) => {
@@ -275,11 +289,42 @@ export function ArticleEditor({
           </header>
 
           <div className="prod-fields two-columns">
-            <label className="prod-field prod-field-wide">
-              <span>Article title *</span>
-              <input name="title" value={title} onChange={(event) => onTitleChange(event.target.value)} required minLength={3} maxLength={180} placeholder="A clear, useful title people will want to open" />
-              <small>URL preview: <strong>{pathPreview}</strong></small>
-            </label>
+            <div className="prod-field prod-field-wide">
+              <span id="article-title-label">Article title *</span>
+              <input aria-labelledby="article-title-label" name="title" value={title} onChange={(event) => onTitleChange(event.target.value)} required minLength={3} maxLength={180} placeholder="A clear, useful title people will want to open" />
+              <div className="prod-slug-preview">
+                <label className="prod-slug-toggle">
+                  <input
+                    type="checkbox"
+                    name="useCustomSlug"
+                    value="true"
+                    checked={editSlug}
+                    onChange={(event) => onEditSlugChange(event.target.checked)}
+                  />
+                  <span>Edit slug</span>
+                </label>
+                <small>URL preview: <strong>{pathPreview}</strong></small>
+              </div>
+              {editSlug ? (
+                <label className="prod-custom-slug">
+                  <span>Custom slug *</span>
+                  <input
+                    name="customSlug"
+                    value={customSlug}
+                    onChange={(event) => setCustomSlug(formatEditableSlug(event.target.value))}
+                    onBlur={() => setCustomSlug(slugifyArticleTitle(customSlug))}
+                    required
+                    minLength={1}
+                    maxLength={160}
+                    pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder="your-custom-article-slug"
+                  />
+                  <small>Use lowercase letters, numbers and hyphens. Other characters are formatted automatically.</small>
+                </label>
+              ) : null}
+            </div>
             <div className="prod-cover-field prod-field-wide">
               <span>Cover image *</span>
               <button

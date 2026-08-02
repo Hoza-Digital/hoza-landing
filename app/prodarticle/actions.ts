@@ -76,8 +76,25 @@ export async function publishArticle(
     };
   }
 
-  const slug = slugifyArticleTitle(parsed.data.title);
-  if (!slug) return { status: "error", message: "The title needs letters or numbers to create a URL." };
+  const useCustomSlug = formData.get("useCustomSlug") === "true";
+  let customSlug = "";
+  if (useCustomSlug) {
+    const submittedCustomSlug = z.string().trim().max(160).safeParse(formData.get("customSlug") ?? "");
+    if (!submittedCustomSlug.success) {
+      return { status: "error", message: "The custom slug must be 160 characters or fewer." };
+    }
+    customSlug = submittedCustomSlug.data;
+  }
+
+  const slug = slugifyArticleTitle(useCustomSlug ? customSlug : parsed.data.title);
+  if (!slug) {
+    return {
+      status: "error",
+      message: useCustomSlug
+        ? "Enter a custom slug containing letters or numbers."
+        : "The title needs letters or numbers to create a URL.",
+    };
+  }
 
   let scheduledFor: string | null = null;
   if (parsed.data.status === "draft") {
