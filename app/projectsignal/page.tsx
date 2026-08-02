@@ -3,7 +3,7 @@ import { AdminTopbar } from "@/app/admin/admin-topbar";
 import { ProjectSignals } from "@/app/admin/enquiry-dashboard";
 import { getAdminSession } from "@/lib/admin-auth";
 import { canAccessProjectSignals } from "@/lib/admin-users";
-import { listEnquiries } from "@/lib/enquiries";
+import { getEnquiryStats, listEnquiries } from "@/lib/enquiries";
 
 export const dynamic = "force-dynamic";
 
@@ -12,12 +12,15 @@ export default async function ProjectSignalPage() {
   if (!admin) redirect("/admlog");
   if (!canAccessProjectSignals(admin.role)) notFound();
 
-  const enquiries = await listEnquiries();
+  const [enquiries, stats] = await Promise.all([
+    listEnquiries(),
+    getEnquiryStats(),
+  ]);
 
   return (
     <main className="admin-dashboard admin-project-page">
       <AdminTopbar user={admin} />
-      <ProjectSignals enquiries={enquiries} />
+      <ProjectSignals enquiries={enquiries} stats={stats} />
     </main>
   );
 }

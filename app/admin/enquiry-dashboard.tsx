@@ -34,6 +34,7 @@ type AdminStatsProps = {
 
 type ProjectSignalsProps = {
   enquiries: Enquiry[];
+  stats: EnquiryStats;
 };
 
 function whatsappUrl(number: string) {
@@ -73,7 +74,7 @@ export function AdminStats({ stats }: AdminStatsProps) {
   );
 }
 
-export function ProjectSignals({ enquiries }: ProjectSignalsProps) {
+export function ProjectSignals({ enquiries, stats }: ProjectSignalsProps) {
   const [query, setQuery] = useState("");
   const [service, setService] = useState("all");
   const [status, setStatus] = useState("all");
@@ -103,6 +104,8 @@ export function ProjectSignals({ enquiries }: ProjectSignalsProps) {
           </div>
           <p><CircleDot aria-hidden="true" /> Live data from the website enquiry form</p>
         </div>
+
+        <AdminStats stats={stats} />
 
         <div className="admin-filters">
           <label className="admin-search">
