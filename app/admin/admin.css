@@ -404,6 +404,7 @@
 .admin-stat-card svg { width: 1rem; color: var(--violet); }
 .admin-stat-card strong { display: block; margin-top: 2rem; font-family: var(--font-display), sans-serif; font-size: 4.2rem; line-height: .8; }
 .admin-stat-card p { margin: 1rem 0 0; color: var(--muted); font-size: .72rem; }
+.admin-leads-section > .admin-stats { margin-top: 1.5rem; }
 
 .admin-leads-section { margin-top: 7rem; }
 .admin-project-page .admin-leads-section { margin-top: clamp(4rem, 8vw, 7rem); }
