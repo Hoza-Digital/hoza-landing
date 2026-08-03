@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { AdminTopbar } from "@/app/admin/admin-topbar";
 import { ProjectSignals } from "@/app/admin/enquiry-dashboard";
@@ -6,6 +7,12 @@ import { canAccessProjectSignals } from "@/lib/admin-users";
 import { getEnquiryStats, listEnquiries } from "@/lib/enquiries";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Project Signals — Hoza",
+  description: "Private Hoza project enquiry records.",
+  robots: { index: false, follow: false },
+};
 
 export default async function ProjectSignalPage() {
   const admin = await getAdminSession();

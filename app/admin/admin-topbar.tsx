@@ -31,18 +31,18 @@ export function AdminTopbar({ user }: { user: AdminIdentity }) {
               Dashboard
             </Link>
             {canAccessProjectSignals(user.role) && (
-              <Link href="/projectsignal">
+              <Link href="/admin/projectsignal">
                 <FolderKanban aria-hidden="true" />
                 Project signals
               </Link>
             )}
             {canAccessArticleProduction(user.role) && (
-              <Link href="/prodarticle">
+              <Link href="/admin/prodarticle">
                 <FilePlus2 aria-hidden="true" />
                 Produce article
               </Link>
             )}
-            <Link href="/user">
+            <Link href="/admin/user">
               <Users aria-hidden="true" />
               User management
             </Link>

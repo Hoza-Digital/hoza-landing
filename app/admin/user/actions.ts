@@ -137,7 +137,7 @@ export async function createUser(
     };
   }
 
-  revalidatePath("/user");
+  revalidatePath("/admin/user");
   return {
     status: "success",
     message: "User created. The password was securely stored and remains case-sensitive.",
@@ -159,7 +159,7 @@ export async function changeUserRole(formData: FormData) {
   if (!target || !canChangeManagedRole(admin.role, target.role)) return;
 
   await updateManagedAdminRole(admin.id, target.id, parsed.data.role);
-  revalidatePath("/user");
+  revalidatePath("/admin/user");
 }
 
 export async function deleteUser(formData: FormData) {
@@ -181,5 +181,5 @@ export async function deleteUser(formData: FormData) {
       console.error("Deleted user profile photo cleanup failed", error);
     }
   }
-  revalidatePath("/user");
+  revalidatePath("/admin/user");
 }

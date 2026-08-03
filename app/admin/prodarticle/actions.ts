@@ -122,7 +122,7 @@ export async function publishArticle(
     revalidatePath("/article");
     revalidatePath(result.path);
     revalidatePath("/sitemap.xml");
-    revalidatePath("/prodarticle");
+    revalidatePath("/admin/prodarticle");
 
     return {
       status: "success",
