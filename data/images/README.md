@@ -1,5 +1,5 @@
 # Article image library
 
-Article cover images are stored as WebP files in `yymmdd/slug.webp` folders and served publicly at `/image/yymmdd/slug`.
+Article images use `yymmdd/slug.webp` object paths in the private `article-images` Supabase Storage bucket and remain publicly addressable through `/image/yymmdd/slug`.
 
-By default, the application uses this directory. Set `ARTICLE_IMAGE_LIBRARY_DIR` to an absolute path when the production server uses a persistent mounted volume.
+The WebP files committed here are seed assets. Production uploads are stored persistently in Supabase rather than in a serverless function filesystem.

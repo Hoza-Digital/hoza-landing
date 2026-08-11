@@ -1,28 +1,11 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { getSupabaseServerConfig } from "./supabase";
 
 const DATE_CODE_PATTERN = /^\d{6}$/;
 const IMAGE_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const STORAGE_PATH_PATTERN = /^(\d{6})\/([a-z0-9]+(?:-[a-z0-9]+)*)\.webp$/;
-
-function libraryRoot() {
-  const configuredRoot = process.env.ARTICLE_IMAGE_LIBRARY_DIR?.trim();
-  if (configuredRoot) return path.resolve(/* turbopackIgnore: true */ configuredRoot);
-  return path.join(process.cwd(), "data", "images");
-}
-
-function safeLibraryPath(...segments: string[]) {
-  const root = libraryRoot();
-  const resolved = path.resolve(root, ...segments);
-  const relative = path.relative(root, resolved);
-  if (relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error("Invalid image library path.");
-  }
-  return resolved;
-}
 
 function jakartaDateCode() {
   const parts = new Intl.DateTimeFormat("en", {
@@ -52,37 +35,56 @@ export type SavedArticleImage = {
   publicUrl: string;
 };
 
+async function callImageLibrary(storagePath: string, method: "GET" | "PUT" | "DELETE", bytes?: Uint8Array) {
+  const { url, publishableKey, backendSecret } = getSupabaseServerConfig();
+  return await fetch(
+    `${url}/functions/v1/hoza-image-library?path=${encodeURIComponent(storagePath)}`,
+    {
+      method,
+      headers: {
+        apikey: publishableKey,
+        Authorization: `Bearer ${publishableKey}`,
+        "x-hoza-backend-secret": backendSecret,
+        ...(bytes ? { "Content-Type": "image/webp" } : {}),
+      },
+      body: bytes ? Buffer.from(bytes) : undefined,
+      cache: "no-store",
+    },
+  );
+}
+
 export async function saveArticleImage(bytes: Uint8Array, originalName: string): Promise<SavedArticleImage> {
   const dateCode = jakartaDateCode();
   const slug = imageSlug(originalName);
-  const directory = safeLibraryPath(dateCode);
-  const filePath = safeLibraryPath(dateCode, `${slug}.webp`);
-
-  await mkdir(directory, { recursive: true });
-  await writeFile(filePath, bytes, { flag: "wx" });
+  const storagePath = `${dateCode}/${slug}.webp`;
+  const response = await callImageLibrary(storagePath, "PUT", bytes);
+  if (!response.ok) {
+    console.error("Supabase image upload failed", { status: response.status });
+    throw new Error("The image could not be stored in the server library.");
+  }
 
   return {
-    storagePath: `${dateCode}/${slug}.webp`,
+    storagePath,
     publicUrl: `/image/${dateCode}/${slug}`,
   };
 }
 
 export async function readArticleImage(dateCode: string, slug: string) {
   if (!DATE_CODE_PATTERN.test(dateCode) || !IMAGE_SLUG_PATTERN.test(slug)) return null;
-  try {
-    return await readFile(safeLibraryPath(dateCode, `${slug}.webp`));
-  } catch (error) {
-    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") return null;
-    throw error;
+  const response = await callImageLibrary(`${dateCode}/${slug}.webp`, "GET");
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    console.error("Supabase image download failed", { status: response.status });
+    throw new Error("The image could not be loaded from the server library.");
   }
+  return new Uint8Array(await response.arrayBuffer());
 }
 
 export async function deleteArticleImage(storagePath: string) {
-  const match = STORAGE_PATH_PATTERN.exec(storagePath);
-  if (!match) return;
-  try {
-    await unlink(safeLibraryPath(match[1], `${match[2]}.webp`));
-  } catch (error) {
-    if (!(error && typeof error === "object" && "code" in error && error.code === "ENOENT")) throw error;
+  if (!STORAGE_PATH_PATTERN.test(storagePath)) return;
+  const response = await callImageLibrary(storagePath, "DELETE");
+  if (!response.ok) {
+    console.error("Supabase image deletion failed", { status: response.status });
+    throw new Error("The image could not be deleted from the server library.");
   }
 }
