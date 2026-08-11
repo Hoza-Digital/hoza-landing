@@ -62,6 +62,54 @@ export function formatBytes(bytes: number) {
   return bytes < 1024 * 1024 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+function isArticleImage(value: unknown): value is ArticleImage {
+  if (!value || typeof value !== "object") return false;
+  const image = value as Partial<ArticleImage>;
+  return typeof image.id === "number"
+    && typeof image.storagePath === "string"
+    && typeof image.publicUrl === "string"
+    && typeof image.originalName === "string"
+    && typeof image.altText === "string"
+    && typeof image.sizeBytes === "number"
+    && typeof image.width === "number"
+    && typeof image.height === "number"
+    && typeof image.createdAt === "string";
+}
+
+async function readJsonResponse(response: Response): Promise<unknown> {
+  const body = await response.text();
+  if (!body.trim()) return null;
+
+  try {
+    return JSON.parse(body) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+function responseError(result: unknown) {
+  if (result && typeof result === "object" && "error" in result && typeof result.error === "string") {
+    return result.error;
+  }
+  return null;
+}
+
+async function recoverUploadedImage(compressed: CompressedImage, altText: string) {
+  const response = await fetch("/api/admin/article-image", {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const result = await readJsonResponse(response);
+  if (!response.ok || !Array.isArray(result)) return null;
+
+  return result.find((value) => isArticleImage(value)
+    && value.originalName === compressed.originalName
+    && value.altText === altText
+    && value.sizeBytes === compressed.blob.size
+    && value.width === compressed.width
+    && value.height === compressed.height) ?? null;
+}
+
 export async function uploadArticleImage(compressed: CompressedImage, altText: string): Promise<ArticleImage> {
   const response = await fetch("/api/admin/article-image", {
     method: "POST",
@@ -74,7 +122,14 @@ export async function uploadArticleImage(compressed: CompressedImage, altText: s
     },
     body: compressed.blob,
   });
-  const result = await response.json() as ArticleImage & { error?: string };
-  if (!response.ok) throw new Error(result.error || "The image could not be uploaded.");
-  return result;
+  const result = await readJsonResponse(response);
+  if (!response.ok) {
+    throw new Error(responseError(result) || `The image could not be uploaded (server status ${response.status}).`);
+  }
+  if (isArticleImage(result)) return result;
+
+  const recovered = await recoverUploadedImage(compressed, altText);
+  if (recovered) return recovered;
+
+  throw new Error("The image was uploaded, but its gallery confirmation could not be loaded. Refresh the page to see it.");
 }

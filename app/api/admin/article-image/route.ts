@@ -1,6 +1,6 @@
 import { getAdminSession } from "@/lib/admin-auth";
 import { canAccessArticleProduction } from "@/lib/admin-users";
-import { registerArticleImage } from "@/lib/articles";
+import { listArticleImages, registerArticleImage } from "@/lib/articles";
 import { deleteArticleImage, saveArticleImage } from "@/lib/image-library";
 
 export const runtime = "nodejs";
@@ -10,10 +10,31 @@ function error(message: string, status: number) {
   return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-export async function POST(request: Request) {
+async function requireArticleAccess() {
   const admin = await getAdminSession();
   if (!admin) return error("Admin login required.", 401);
   if (!canAccessArticleProduction(admin.role)) return error("Not found.", 404);
+  return null;
+}
+
+export async function GET() {
+  try {
+    const accessError = await requireArticleAccess();
+    if (accessError) return accessError;
+
+    return Response.json(await listArticleImages(), {
+      headers: { "Cache-Control": "no-store" },
+    });
+  } catch (requestError) {
+    console.error("Article image gallery request failed", requestError);
+    return error("The image gallery could not be loaded.", 500);
+  }
+}
+
+async function uploadArticleImage(request: Request) {
+  const accessError = await requireArticleAccess();
+  if (accessError) return accessError;
+
   if (request.headers.get("content-type")?.split(";")[0] !== "image/webp") {
     return error("Only WebP images are accepted.", 415);
   }
@@ -72,7 +93,20 @@ export async function POST(request: Request) {
       { status: 201, headers: { "Cache-Control": "no-store" } },
     );
   } catch (uploadError) {
-    await deleteArticleImage(saved.storagePath);
+    try {
+      await deleteArticleImage(saved.storagePath);
+    } catch (cleanupError) {
+      console.error("Unused article image cleanup failed", cleanupError);
+    }
     throw uploadError;
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    return await uploadArticleImage(request);
+  } catch (requestError) {
+    console.error("Article image upload failed", requestError);
+    return error("The image could not be uploaded. Please try again.", 500);
   }
 }
