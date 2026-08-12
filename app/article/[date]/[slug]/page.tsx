@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { cache, type ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { ArticleHeader } from "@/components/article-header";
+import { Footer } from "@/components/footer";
 import { articleContentToPlainText } from "@/lib/article-content";
 import { getPublishedArticle } from "@/lib/articles";
 
@@ -223,6 +224,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
           <Link href="/#contact">Start a project <ArrowUpRight aria-hidden="true" /></Link>
         </section>
       </main>
+      <Footer />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { ArticleHeader } from "@/components/article-header";
+import { Footer } from "@/components/footer";
 import { articlePath, listPublishedArticles } from "@/lib/articles";
 
 export const dynamic = "force-dynamic";
@@ -86,10 +87,7 @@ export default async function ArticleIndexPage({ searchParams }: ArticleIndexPro
           )}
         </section>
       </main>
-      <footer className="article-footer">
-        <span>HOZA DIGITAL / FIELD NOTES</span>
-        <Link href="/">Back to studio <ArrowUpRight aria-hidden="true" /></Link>
-      </footer>
+      <Footer />
     </>
   );
 }

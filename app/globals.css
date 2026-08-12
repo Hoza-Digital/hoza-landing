@@ -416,8 +416,17 @@ html.portal-active main, html.portal-active footer { transform: scale(.988); fil
 .contact-options a, .contact-options button { min-height: 3.5rem; width: 100%; display: grid; grid-template-columns: 2rem 1fr auto; gap: 1rem; align-items: center; padding: 1.2rem 0; border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; color: var(--text-secondary); cursor: pointer; transition: color .3s, background .3s; }.contact-options a:hover, .contact-options button:hover { color: var(--text); background: var(--accent-whisper); }.contact-options svg { width: 1rem; color: var(--violet); transition: transform .3s var(--ease-out); }.contact-options a:hover svg, .contact-options button:hover svg { transform: translateX(.3rem); }
 
 /* Footer */
-.site-footer { min-height: 13rem; padding-block: 3rem; display: grid; grid-template-columns: 1.3fr repeat(3,1fr); gap: 2rem; align-items: end; border-top: 1px solid var(--line); }
+.site-footer { min-height: 13rem; padding-block: 3rem; display: grid; grid-template-columns: 1.3fr repeat(4,1fr); gap: 2rem; align-items: end; border-top: 1px solid var(--line); }
 .site-footer > div > span { display: block; margin-bottom: .8rem; color: var(--muted); font-size: .55rem; letter-spacing: .11em; }.site-footer p { margin: .8rem 0 0; color: var(--text-secondary); font-size: .67rem; letter-spacing: .06em; }.site-footer > div:first-child p { max-width: 18rem; line-height: 1.6; letter-spacing: 0; }
+.footer-socials { display: flex; flex-wrap: wrap; gap: .55rem; }
+.footer-socials a { width: 2rem; height: 2rem; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--text-secondary); transition: color .25s, border-color .25s, transform .25s; }
+.footer-socials .social-x-link { color: #fff; }
+.footer-socials svg { width: 1rem; height: 1rem; }
+.social-x-mark { position: relative; width: 1rem; height: 1rem; display: block; }
+.social-x-mark::before, .social-x-mark::after { content: ""; position: absolute; left: 50%; top: 50%; width: 1.15rem; height: 1.5px; border-radius: 999px; background: currentColor; }
+.social-x-mark::before { transform: translate(-50%, -50%) rotate(49deg); }
+.social-x-mark::after { transform: translate(-50%, -50%) rotate(-49deg); }
+.footer-socials a:hover, .footer-socials a:focus-visible { color: var(--lavender); border-color: var(--violet); transform: translateY(-2px); }
 
 /* Floating WhatsApp */
 .floating-whatsapp {

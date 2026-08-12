@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CursorLight } from "@/components/cursor-light";
+import { EnquiryModal } from "@/components/enquiry-modal";
 import "./article.css";
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function ArticleLayout({ children }: Readonly<{ children: React.R
   return (
     <div className="article-root">
       <CursorLight />
+      <EnquiryModal />
       {children}
     </div>
   );
