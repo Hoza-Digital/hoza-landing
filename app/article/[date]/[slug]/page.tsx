@@ -128,7 +128,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const article = await getArticle(date, slug);
   if (!article) return { title: "Article not found — Hoza Digital" };
   const path = `/article/${date}/${article.slug}`;
-  const coverImageUrl = absoluteUrl(article.coverImageUrl);
+  const socialImageUrl = absoluteUrl(`${path}/social-image?v=${encodeURIComponent(article.updatedAt)}`);
 
   return {
     title: article.seoTitle,
@@ -139,19 +139,27 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     openGraph: {
       type: "article",
       url: path,
+      siteName: "Hoza Digital",
+      locale: "en_US",
       title: article.seoTitle,
       description: article.seoDescription,
       publishedTime: article.publishedAt ?? undefined,
       modifiedTime: article.updatedAt,
       authors: [article.authorName],
       section: article.category,
-      images: [{ url: coverImageUrl, alt: article.coverImageAlt }],
+      images: [{
+        url: socialImageUrl,
+        width: 1200,
+        height: 630,
+        type: "image/png",
+        alt: article.coverImageAlt,
+      }],
     },
     twitter: {
       card: "summary_large_image",
       title: article.seoTitle,
       description: article.seoDescription,
-      images: [coverImageUrl],
+      images: [{ url: socialImageUrl, alt: article.coverImageAlt }],
     },
   };
 }
