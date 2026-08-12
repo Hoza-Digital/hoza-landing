@@ -17,6 +17,7 @@
     "@tiptap/pm": "^3.29.2",
     "@tiptap/react": "^3.29.2",
     "@tiptap/starter-kit": "^3.29.2",
+    "country-telephone-data": "^0.6.3",
     "lucide-react": "^0.468.0",
     "next": "^16.2.10",
     "react": "^19.2.7",

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { openEnquiry } from "@/lib/events";
 import { Logo } from "./logo";
 
 const links = [
@@ -75,7 +76,7 @@ export function ArticleHeader() {
       </nav>
 
       <div className="nav-actions">
-        <Link className="nav-cta" href="/#contact" tabIndex={open ? -1 : 0}>Start a Project <span>↗</span></Link>
+        <button className="nav-cta" type="button" onClick={openEnquiry} tabIndex={open ? -1 : 0}>Start a Project <span>↗</span></button>
         <button
           ref={toggleRef}
           className="menu-toggle"
@@ -101,7 +102,13 @@ export function ArticleHeader() {
             <Link href="/article" onClick={closeMenu} aria-current="page">
               <span>04</span>Article
             </Link>
-            <Link className="mobile-project" href="/#contact" onClick={closeMenu}>START A PROJECT ↗</Link>
+            <button className="mobile-project" type="button" onClick={() => {
+              setOpen(false);
+              window.requestAnimationFrame(() => {
+                toggleRef.current?.focus();
+                openEnquiry();
+              });
+            }}>START A PROJECT ↗</button>
             <p>INDONESIA / SINGAPORE / WORLDWIDE</p>
           </div>
         )}

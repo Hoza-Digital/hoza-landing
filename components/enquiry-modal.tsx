@@ -2,6 +2,7 @@
 
 import { Check, Loader2, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { allCountries } from "country-telephone-data";
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
@@ -19,6 +20,12 @@ const initialForm = {
 
 type FormKey = keyof typeof initialForm;
 type FormErrors = Partial<Record<FormKey, string>>;
+
+const countries = allCountries.map((country) => ({
+  name: country.name.replace(/\s*\([^)]*\)\s*$/, ""),
+  iso2: country.iso2,
+  dialCode: `+${country.dialCode}`,
+}));
 
 const validateForm = (form: typeof initialForm): FormErrors => {
   const errors: FormErrors = {};
@@ -99,6 +106,27 @@ export function EnquiryModal() {
     setErrors((current) => ({ ...current, [key]: undefined }));
   };
 
+  const selectCountry = (countryName: string) => {
+    setForm((current) => {
+      const previousCountry = countries.find((country) => country.name === current.country);
+      const selectedCountry = countries.find((country) => country.name === countryName);
+      let localNumber = current.whatsapp.trim();
+
+      if (previousCountry && localNumber.startsWith(previousCountry.dialCode)) {
+        localNumber = localNumber.slice(previousCountry.dialCode.length).trimStart();
+      }
+
+      return {
+        ...current,
+        country: countryName,
+        whatsapp: selectedCountry
+          ? `${selectedCountry.dialCode}${localNumber ? ` ${localNumber}` : ""}`
+          : localNumber,
+      };
+    });
+    setErrors((current) => ({ ...current, country: undefined }));
+  };
+
   const focusField = (key: FormKey) => {
     window.requestAnimationFrame(() => dialogRef.current?.querySelector<HTMLElement>(`[name="${key}"]`)?.focus());
   };
@@ -166,8 +194,8 @@ export function EnquiryModal() {
               <label><span>Name *</span><input ref={firstFieldRef} name="name" required maxLength={100} autoComplete="name" value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Your name" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "name-error" : undefined} />{errors.name && <small id="name-error" className="field-error">{errors.name}</small>}</label>
               <label><span>Company</span><input name="company" maxLength={120} autoComplete="organization" value={form.company} onChange={(e) => update("company", e.target.value)} placeholder="Company or project" /></label>
               <label><span>Email *</span><input name="email" type="email" required maxLength={254} autoComplete="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="name@company.com" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "email-error" : undefined} />{errors.email && <small id="email-error" className="field-error">{errors.email}</small>}</label>
-              <label><span>WhatsApp number</span><input name="whatsapp" type="tel" maxLength={40} autoComplete="tel" value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="+62 / +65 ..." /></label>
-              <label><span>Country *</span><input name="country" required maxLength={80} autoComplete="country-name" value={form.country} onChange={(e) => update("country", e.target.value)} placeholder="Indonesia, Singapore..." aria-invalid={Boolean(errors.country)} aria-describedby={errors.country ? "country-error" : undefined} />{errors.country && <small id="country-error" className="field-error">{errors.country}</small>}</label>
+              <label><span>Country *</span><select name="country" required autoComplete="country-name" value={form.country} onChange={(e) => selectCountry(e.target.value)} aria-invalid={Boolean(errors.country)} aria-describedby={errors.country ? "country-error" : undefined}><option value="">Select a country</option>{countries.map((country) => <option key={country.iso2} value={country.name}>{country.name} ({country.dialCode})</option>)}</select>{errors.country && <small id="country-error" className="field-error">{errors.country}</small>}</label>
+              <label><span>WhatsApp number</span><input name="whatsapp" type="tel" inputMode="tel" maxLength={40} autoComplete="tel" value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="Select a country for its dialing code" /></label>
               <label><span>Service required *</span><select name="service" required value={form.service} onChange={(e) => update("service", e.target.value)} aria-invalid={Boolean(errors.service)} aria-describedby={errors.service ? "service-error" : undefined}><option value="">Select a service</option><option>Website</option><option>Landing Page</option><option>Web Application</option><option>Mobile Application</option><option>Automation</option><option>Custom Software</option><option>Not sure yet</option></select>{errors.service && <small id="service-error" className="field-error">{errors.service}</small>}</label>
               <label><span>Estimated budget *</span><select name="budget" required value={form.budget} onChange={(e) => update("budget", e.target.value)} aria-invalid={Boolean(errors.budget)} aria-describedby={errors.budget ? "budget-error" : undefined}><option value="">Select a range</option><option>Under USD 3,000</option><option>USD 3,000–7,500</option><option>USD 7,500–15,000</option><option>USD 15,000–30,000</option><option>USD 30,000+</option><option>Need guidance</option></select>{errors.budget && <small id="budget-error" className="field-error">{errors.budget}</small>}</label>
               <label><span>Preferred launch timeline *</span><select name="timeline" required value={form.timeline} onChange={(e) => update("timeline", e.target.value)} aria-invalid={Boolean(errors.timeline)} aria-describedby={errors.timeline ? "timeline-error" : undefined}><option value="">Select a timeline</option><option>As soon as responsibly possible</option><option>Within 1 month</option><option>1–3 months</option><option>3–6 months</option><option>Flexible / exploring</option></select>{errors.timeline && <small id="timeline-error" className="field-error">{errors.timeline}</small>}</label>
