@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { cache, type ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { ArticleHeader } from "@/components/article-header";
+import { ArticleShare } from "@/components/article-share";
 import { Footer } from "@/components/footer";
 import { articleContentToPlainText } from "@/lib/article-content";
 import { getPublishedArticle } from "@/lib/articles";
@@ -214,7 +215,12 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         </figure>
 
         <div id="article-content" className="article-body">
-          <aside><span>FIELD NOTE</span><strong>{article.category}</strong><i /></aside>
+          <aside>
+            <span>FIELD NOTE</span>
+            <strong>{article.category}</strong>
+            <i />
+            <ArticleShare title={article.title} url={canonical} />
+          </aside>
           <article>{renderContent(article.content)}</article>
         </div>
 
