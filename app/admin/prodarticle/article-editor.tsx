@@ -480,7 +480,20 @@ export function ArticleEditor({
                 <Image src={article.coverImageUrl} alt="" width={112} height={76} />
                 <div>
                   <span>{article.category}</span>
-                  <h3>{article.title}</h3>
+                  <h3>
+                    {article.status === "published" ? (
+                      <Link
+                        href={path}
+                        target="_blank"
+                        className="prod-article-title-link"
+                        title={`Open ${article.title} in new tab`}
+                      >
+                        {article.title}
+                      </Link>
+                    ) : (
+                      article.title
+                    )}
+                  </h3>
                   <small>{formatArticleDate(article.publishDate)}</small>
                 </div>
                 <i className={`is-${article.status}`}>{article.status}</i>
@@ -512,17 +525,6 @@ export function ArticleEditor({
                     )}
                     <span>{isArchived ? "Unarchive" : "Archive"}</span>
                   </button>
-                  {article.status === "published" && (
-                    <Link
-                      href={path}
-                      target="_blank"
-                      aria-label={`Open ${article.title}`}
-                      className="prod-article-btn-view"
-                      title="View public article"
-                    >
-                      <ArrowUpRight aria-hidden="true" />
-                    </Link>
-                  )}
                 </div>
               </article>
             );
