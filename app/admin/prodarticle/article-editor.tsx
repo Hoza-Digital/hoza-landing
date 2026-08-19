@@ -16,7 +16,6 @@ import {
   Pencil,
   Search,
   Sparkles,
-  Trash2,
   X,
 } from "lucide-react";
 import {
@@ -28,7 +27,6 @@ import {
 } from "@/lib/articles";
 import {
   type ArticleFormState,
-  deleteArticleAction,
   publishArticle,
   toggleArticleArchiveAction,
 } from "./actions";
@@ -76,19 +74,15 @@ export function ArticleEditor({
   const router = useRouter();
   const [editingArticleId, setEditingArticleId] = useState<number | null>(null);
   const [archivingId, setArchivingId] = useState<number | null>(null);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [statusOverrides, setStatusOverrides] = useState<Record<number, ArticleStatus>>({});
   const [actionError, setActionError] = useState<string | null>(null);
 
   const articleList = useMemo(() => {
-    return articles
-      .filter((article) => !deletedIds.has(article.id))
-      .map((article) => ({
-        ...article,
-        ...(statusOverrides[article.id] ? { status: statusOverrides[article.id] } : {}),
-      }));
-  }, [articles, statusOverrides, deletedIds]);
+    return articles.map((article) => ({
+      ...article,
+      ...(statusOverrides[article.id] ? { status: statusOverrides[article.id] } : {}),
+    }));
+  }, [articles, statusOverrides]);
 
   const handleToggleArchive = async (id: number) => {
     setArchivingId(id);
@@ -97,24 +91,6 @@ export function ArticleEditor({
     setArchivingId(null);
     if (res.ok && res.status) {
       setStatusOverrides((prev) => ({ ...prev, [id]: res.status as ArticleStatus }));
-      router.refresh();
-    } else if (res.error) {
-      setActionError(res.error);
-    }
-  };
-
-  const handleDeleteArticle = async (id: number, articleTitle: string) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to permanently delete "${articleTitle}"?\n\nThis action cannot be undone.`
-    );
-    if (!confirmed) return;
-
-    setDeletingId(id);
-    setActionError(null);
-    const res = await deleteArticleAction(id);
-    setDeletingId(null);
-    if (res.ok) {
-      setDeletedIds((prev) => new Set(prev).add(id));
       router.refresh();
     } else if (res.error) {
       setActionError(res.error);
@@ -535,21 +511,6 @@ export function ArticleEditor({
                       <Archive aria-hidden="true" />
                     )}
                     <span>{isArchived ? "Unarchive" : "Archive"}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="prod-article-btn prod-article-btn-delete"
-                    onClick={() => void handleDeleteArticle(article.id, article.title)}
-                    disabled={deletingId === article.id}
-                    aria-label={`Delete ${article.title}`}
-                    title="Permanently delete article"
-                  >
-                    {deletingId === article.id ? (
-                      <LoaderCircle className="admin-spin" aria-hidden="true" />
-                    ) : (
-                      <Trash2 aria-hidden="true" />
-                    )}
-                    <span>Delete</span>
                   </button>
                   {article.status === "published" && (
                     <Link
