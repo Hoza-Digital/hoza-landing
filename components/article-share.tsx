@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, Facebook, Instagram, MessageCircle, Send } from "lucide-react";
+import { Check, Facebook, Instagram, Link2, MessageCircle, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type ArticleShareProps = {
@@ -65,7 +65,7 @@ export function ArticleShare({ title, url }: ArticleShareProps) {
           <Send aria-hidden="true" />
         </a>
         <button type="button" onClick={() => copyLink()} aria-label="Copy article link" title="Copy article link">
-          {feedback.startsWith("Link copied") ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+          {feedback.startsWith("Link copied") ? <Check aria-hidden="true" /> : <Link2 aria-hidden="true" />}
         </button>
       </div>
       <p className="article-share-feedback" aria-live="polite">{feedback}</p>

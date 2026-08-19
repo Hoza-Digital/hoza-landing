@@ -3,15 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
+  Archive,
+  ArchiveRestore,
   ArrowUpRight,
   Check,
   FileImage,
   GalleryHorizontal,
   ImagePlus,
   LoaderCircle,
+  Pencil,
   Search,
   Sparkles,
+  Trash2,
   X,
 } from "lucide-react";
 import {
@@ -21,7 +26,13 @@ import {
   type ArticleSummary,
   slugifyArticleTitle,
 } from "@/lib/articles";
-import { type ArticleFormState, publishArticle } from "./actions";
+import {
+  type ArticleFormState,
+  deleteArticleAction,
+  publishArticle,
+  toggleArticleArchiveAction,
+} from "./actions";
+import { EditArticleModal } from "./edit-article-modal";
 import {
   type CompressedImage,
   MAX_IMAGE_BYTES,
@@ -62,6 +73,54 @@ export function ArticleEditor({
   defaultDraftTime,
 }: ArticleEditorProps) {
   const [formState, formAction, formPending] = useActionState(publishArticle, initialArticleFormState);
+  const router = useRouter();
+  const [editingArticleId, setEditingArticleId] = useState<number | null>(null);
+  const [archivingId, setArchivingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
+  const [statusOverrides, setStatusOverrides] = useState<Record<number, ArticleStatus>>({});
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const articleList = useMemo(() => {
+    return articles
+      .filter((article) => !deletedIds.has(article.id))
+      .map((article) => ({
+        ...article,
+        ...(statusOverrides[article.id] ? { status: statusOverrides[article.id] } : {}),
+      }));
+  }, [articles, statusOverrides, deletedIds]);
+
+  const handleToggleArchive = async (id: number) => {
+    setArchivingId(id);
+    setActionError(null);
+    const res = await toggleArticleArchiveAction(id);
+    setArchivingId(null);
+    if (res.ok && res.status) {
+      setStatusOverrides((prev) => ({ ...prev, [id]: res.status as ArticleStatus }));
+      router.refresh();
+    } else if (res.error) {
+      setActionError(res.error);
+    }
+  };
+
+  const handleDeleteArticle = async (id: number, articleTitle: string) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to permanently delete "${articleTitle}"?\n\nThis action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(id);
+    setActionError(null);
+    const res = await deleteArticleAction(id);
+    setDeletingId(null);
+    if (res.ok) {
+      setDeletedIds((prev) => new Set(prev).add(id));
+      router.refresh();
+    } else if (res.error) {
+      setActionError(res.error);
+    }
+  };
+
   const [images, setImages] = useState(initialImages);
   const [selectedImage, setSelectedImage] = useState<ArticleImage | null>(initialImages[0] ?? null);
   const [sourceMode, setSourceMode] = useState<"upload" | "gallery">(initialImages.length ? "gallery" : "upload");
@@ -426,23 +485,101 @@ export function ArticleEditor({
       <section className="prod-recent" aria-labelledby="recent-articles-heading">
         <header>
           <div><span className="eyebrow">Content library</span><h2 id="recent-articles-heading">RECENT ARTICLES.</h2></div>
-          <p>{articles.length} {articles.length === 1 ? "article" : "articles"} in the database</p>
+          <p>{articleList.length} {articleList.length === 1 ? "article" : "articles"} in the database</p>
         </header>
+        {actionError && (
+          <div className="prod-result is-error" style={{ marginBlock: "1.5rem" }} role="alert">
+            <X aria-hidden="true" />
+            <span>{actionError}</span>
+          </div>
+        )}
         <div className="prod-article-list">
-          {articles.map((article) => {
+          {articleList.map((article) => {
             const path = `/article/${articleDateCode(article.publishDate)}/${article.slug}`;
+            const isArchived = article.status === "archived";
+            const isArchivingThis = archivingId === article.id;
+
             return (
               <article key={article.id}>
                 <Image src={article.coverImageUrl} alt="" width={112} height={76} />
-                <div><span>{article.category}</span><h3>{article.title}</h3><small>{formatArticleDate(article.publishDate)}</small></div>
+                <div>
+                  <span>{article.category}</span>
+                  <h3>{article.title}</h3>
+                  <small>{formatArticleDate(article.publishDate)}</small>
+                </div>
                 <i className={`is-${article.status}`}>{article.status}</i>
-                {article.status === "published" && <Link href={path} target="_blank" aria-label={`Open ${article.title}`}><ArrowUpRight aria-hidden="true" /></Link>}
+                <div className="prod-article-row-actions">
+                  <button
+                    type="button"
+                    className="prod-article-btn prod-article-btn-edit"
+                    onClick={() => setEditingArticleId(article.id)}
+                    aria-label={`Edit ${article.title}`}
+                    title="Edit article"
+                  >
+                    <Pencil aria-hidden="true" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`prod-article-btn ${isArchived ? "prod-article-btn-unarchive" : "prod-article-btn-archive"}`}
+                    onClick={() => void handleToggleArchive(article.id)}
+                    disabled={isArchivingThis}
+                    aria-label={isArchived ? `Unarchive ${article.title}` : `Archive ${article.title}`}
+                    title={isArchived ? "Unarchive article (restore to public)" : "Archive article (hide from front page)"}
+                  >
+                    {isArchivingThis ? (
+                      <LoaderCircle className="admin-spin" aria-hidden="true" />
+                    ) : isArchived ? (
+                      <ArchiveRestore aria-hidden="true" />
+                    ) : (
+                      <Archive aria-hidden="true" />
+                    )}
+                    <span>{isArchived ? "Unarchive" : "Archive"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="prod-article-btn prod-article-btn-delete"
+                    onClick={() => void handleDeleteArticle(article.id, article.title)}
+                    disabled={deletingId === article.id}
+                    aria-label={`Delete ${article.title}`}
+                    title="Permanently delete article"
+                  >
+                    {deletingId === article.id ? (
+                      <LoaderCircle className="admin-spin" aria-hidden="true" />
+                    ) : (
+                      <Trash2 aria-hidden="true" />
+                    )}
+                    <span>Delete</span>
+                  </button>
+                  {article.status === "published" && (
+                    <Link
+                      href={path}
+                      target="_blank"
+                      aria-label={`Open ${article.title}`}
+                      className="prod-article-btn-view"
+                      title="View public article"
+                    >
+                      <ArrowUpRight aria-hidden="true" />
+                    </Link>
+                  )}
+                </div>
               </article>
             );
           })}
-          {!articles.length && <p className="prod-no-articles">Your first saved article will appear here.</p>}
+          {!articleList.length && <p className="prod-no-articles">Your first saved article will appear here.</p>}
         </div>
       </section>
+
+      {editingArticleId !== null && (
+        <EditArticleModal
+          articleId={editingArticleId}
+          initialImages={images}
+          onClose={() => setEditingArticleId(null)}
+          onSaved={() => {
+            router.refresh();
+          }}
+        />
+      )}
     </>
   );
 }

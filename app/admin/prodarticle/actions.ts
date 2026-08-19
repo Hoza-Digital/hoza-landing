@@ -6,7 +6,16 @@ import { z } from "zod";
 import { getAdminSession } from "@/lib/admin-auth";
 import { canAccessArticleProduction } from "@/lib/admin-users";
 import { articleContentToPlainText } from "@/lib/article-content";
-import { ARTICLE_STATUSES, createArticle, slugifyArticleTitle } from "@/lib/articles";
+import {
+  ARTICLE_STATUSES,
+  createArticle,
+  deleteArticle,
+  type FullArticle,
+  getAdminArticleById,
+  slugifyArticleTitle,
+  toggleArticleArchive,
+  updateArticle,
+} from "@/lib/articles";
 
 function hasOnlySafeInlineImages(content: string) {
   return Array.from(content.matchAll(/!\[[^\]]*]\(([^)]+)\)/g))
@@ -43,7 +52,7 @@ export type ArticleFormState = {
   status: "idle" | "error" | "success";
   message: string;
   path?: string;
-  articleStatus?: "draft" | "published";
+  articleStatus?: "draft" | "published" | "archived";
 };
 
 export async function publishArticle(
@@ -138,5 +147,159 @@ export async function publishArticle(
       status: "error",
       message: "The article could not be saved. A matching title may already exist for this publish date.",
     };
+  }
+}
+
+export async function getArticleForEdit(id: number): Promise<{ ok: boolean; article?: FullArticle; error?: string }> {
+  const admin = await getAdminSession();
+  if (!admin || !canAccessArticleProduction(admin.role)) {
+    return { ok: false, error: "Unauthorized access." };
+  }
+
+  try {
+    const article = await getAdminArticleById(id);
+    if (!article) return { ok: false, error: "Article not found." };
+    return { ok: true, article };
+  } catch (error) {
+    console.error("Failed to fetch article for edit", error);
+    return { ok: false, error: "Failed to retrieve article." };
+  }
+}
+
+export async function updateArticleAction(
+  _previousState: ArticleFormState,
+  formData: FormData,
+): Promise<ArticleFormState> {
+  const admin = await getAdminSession();
+  if (!admin) redirect("/admlog");
+  if (!canAccessArticleProduction(admin.role)) notFound();
+
+  const id = Number(formData.get("id"));
+  if (!id || Number.isNaN(id)) {
+    return { status: "error", message: "Invalid article ID." };
+  }
+
+  const submittedStatus = formData.get("status");
+  const isDraft = submittedStatus === "draft";
+  const parsed = articleSchema.safeParse({
+    title: formData.get("title"),
+    category: formData.get("category"),
+    excerpt: formData.get("excerpt"),
+    content: formData.get("content"),
+    coverImageUrl: formData.get("coverImageUrl"),
+    coverImagePath: formData.get("coverImagePath"),
+    coverImageAlt: formData.get("coverImageAlt"),
+    status: submittedStatus,
+    publishDate: formData.get("publishDate"),
+    publishTime: isDraft ? formData.get("publishTime") : null,
+  });
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: "Check every required field, select a gallery image and make sure the main content is at least 50 characters.",
+    };
+  }
+
+  const useCustomSlug = formData.get("useCustomSlug") === "true";
+  let customSlug = "";
+  if (useCustomSlug) {
+    const submittedCustomSlug = z.string().trim().max(160).safeParse(formData.get("customSlug") ?? "");
+    if (!submittedCustomSlug.success) {
+      return { status: "error", message: "The custom slug must be 160 characters or fewer." };
+    }
+    customSlug = submittedCustomSlug.data;
+  }
+
+  const slug = slugifyArticleTitle(useCustomSlug ? customSlug : parsed.data.title);
+  if (!slug) {
+    return {
+      status: "error",
+      message: useCustomSlug
+        ? "Enter a custom slug containing letters or numbers."
+        : "The title needs letters or numbers to create a URL.",
+    };
+  }
+
+  let scheduledFor: string | null = null;
+  if (parsed.data.status === "draft") {
+    if (!parsed.data.publishTime) {
+      return { status: "error", message: "Choose a publication date and time for the draft." };
+    }
+
+    const scheduledDate = new Date(`${parsed.data.publishDate}T${parsed.data.publishTime}:00+07:00`);
+    if (Number.isNaN(scheduledDate.getTime())) {
+      return { status: "error", message: "Choose a valid publication date and time in WIB." };
+    }
+    scheduledFor = scheduledDate.toISOString();
+  }
+
+  try {
+    const result = await updateArticle(id, {
+      ...parsed.data,
+      slug,
+      scheduledFor,
+      seoTitle: parsed.data.title,
+      seoDescription: parsed.data.excerpt.slice(0, 320),
+      geoSummary: createGeoSummary(parsed.data.category, parsed.data.excerpt, parsed.data.content),
+    });
+
+    revalidatePath("/article");
+    revalidatePath(result.path);
+    revalidatePath("/sitemap.xml");
+    revalidatePath("/admin/prodarticle");
+
+    return {
+      status: "success",
+      message: "Article changes saved successfully.",
+      path: result.path,
+      articleStatus: result.status,
+    };
+  } catch (error) {
+    console.error("Article update failed", error);
+    return {
+      status: "error",
+      message: "The article could not be updated. Please try again.",
+    };
+  }
+}
+
+export async function toggleArticleArchiveAction(
+  id: number,
+): Promise<{ ok: boolean; status?: "draft" | "published" | "archived"; error?: string }> {
+  const admin = await getAdminSession();
+  if (!admin || !canAccessArticleProduction(admin.role)) {
+    return { ok: false, error: "Unauthorized." };
+  }
+
+  try {
+    const result = await toggleArticleArchive(id);
+    revalidatePath("/article");
+    revalidatePath("/sitemap.xml");
+    revalidatePath("/admin/prodarticle");
+    return { ok: true, status: result.status };
+  } catch (error) {
+    console.error("Failed to toggle article archive", error);
+    return { ok: false, error: "Failed to update article status." };
+  }
+}
+
+export async function deleteArticleAction(
+  id: number,
+): Promise<{ ok: boolean; id?: number; error?: string }> {
+  const admin = await getAdminSession();
+  if (!admin || !canAccessArticleProduction(admin.role)) {
+    return { ok: false, error: "Unauthorized." };
+  }
+
+  try {
+    const result = await deleteArticle(id);
+    revalidatePath("/article");
+    revalidatePath("/sitemap.xml");
+    revalidatePath("/admin/prodarticle");
+    return { ok: true, id: result.id };
+  } catch (error) {
+    console.error("Failed to delete article", error);
+    return { ok: false, error: "Failed to delete article. Make sure the database migration has been applied." };
   }
 }

@@ -20,14 +20,14 @@ export function SocialLinks({ className = "footer-socials" }: { className?: stri
 export function Footer() {
   return (
     <footer className="site-footer section-grid">
-      <div><Logo /><p>Websites, applications and automation systems built fast.</p></div>
-      <div><span>LOCATION</span><p>INDONESIA / SINGAPORE / WORLDWIDE</p></div>
-      <div><span>SYSTEM</span><p><i /> AVAILABLE FOR SELECT PROJECTS</p></div>
-      <div>
+      <div className="footer-brand"><Logo /><p>Websites, applications and automation systems built fast.</p></div>
+      <div className="footer-location"><span>LOCATION</span><p>INDONESIA / SINGAPORE / WORLDWIDE</p></div>
+      <div className="footer-system"><span>SYSTEM</span><p><i /> AVAILABLE FOR SELECT PROJECTS</p></div>
+      <div className="footer-follow">
         <span>FOLLOW</span>
         <SocialLinks />
       </div>
-      <div><span>© {new Date().getFullYear()} HOZA</span><p>BUILD FAST. MOVE FORWARD.</p></div>
+      <div className="footer-copyright"><span>© {new Date().getFullYear()} HOZA</span><p>BUILD FAST. MOVE FORWARD.</p></div>
     </footer>
   );
 }
