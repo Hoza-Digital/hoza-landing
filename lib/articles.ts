@@ -136,25 +136,35 @@ export function articlePath(article: Pick<ArticleSummary, "publishDate" | "slug"
 }
 
 export async function listPublishedArticles(): Promise<ArticleSummary[]> {
-  const rows = await callSupabaseRpc<ArticleSummaryRow[]>("hoza_list_published_articles");
-  return rows.map(mapSummary);
+  try {
+    const rows = await callSupabaseRpc<ArticleSummaryRow[]>("hoza_list_published_articles");
+    return rows.map(mapSummary);
+  } catch (error) {
+    console.error("Failed to list published articles:", error);
+    return [];
+  }
 }
 
 export async function getPublishedArticle(dateCode: string, slug: string): Promise<Article | null> {
-  const rows = await callSupabaseRpc<ArticleRow[]>("hoza_get_published_article", {
-    p_date_code: dateCode,
-    p_slug: slug,
-  });
-  const row = rows[0];
-  if (!row) return null;
+  try {
+    const rows = await callSupabaseRpc<ArticleRow[]>("hoza_get_published_article", {
+      p_date_code: dateCode,
+      p_slug: slug,
+    });
+    const row = rows[0];
+    if (!row) return null;
 
-  return {
-    ...mapSummary(row),
-    content: row.content,
-    seoTitle: row.seo_title,
-    seoDescription: row.seo_description,
-    geoSummary: row.geo_summary,
-  };
+    return {
+      ...mapSummary(row),
+      content: row.content,
+      seoTitle: row.seo_title,
+      seoDescription: row.seo_description,
+      geoSummary: row.geo_summary,
+    };
+  } catch (error) {
+    console.error("Failed to get published article:", error);
+    return null;
+  }
 }
 
 export async function listArticleImages(): Promise<ArticleImage[]> {
