@@ -40,8 +40,58 @@ import {
 type RichTextEditorProps = {
   images: ArticleImage[];
   name: string;
+  initialContent?: string;
+  onChange?: (content: string) => void;
   onImageUploaded: (image: ArticleImage) => void;
 };
+
+function markdownToHtml(content: string): string {
+  if (!content) return "<p></p>";
+  if (/^<[a-z][\s\S]*>/i.test(content.trim())) return content;
+
+  const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const parseInline = (text: string) => {
+    return escapeHtml(text)
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
+      .replace(/!\[([^\]]*)\]\((\/image\/[^)\s]+)\)/g, '<img src="$2" alt="$1" class="prod-rich-inline-image" />');
+  };
+
+  const lines = content.replaceAll("\r\n", "\n").split("\n\n");
+  const htmlBlocks: string[] = [];
+
+  for (const block of lines) {
+    const trimmed = block.trim();
+    if (!trimmed) continue;
+
+    if (trimmed.startsWith("### ")) {
+      htmlBlocks.push(`<h3>${parseInline(trimmed.slice(4))}</h3>`);
+    } else if (trimmed.startsWith("## ")) {
+      htmlBlocks.push(`<h2>${parseInline(trimmed.slice(3))}</h2>`);
+    } else if (trimmed.startsWith("> ")) {
+      const quoteText = trimmed.split("\n").map((l) => l.replace(/^>\s?/, "")).join("<br/>");
+      htmlBlocks.push(`<blockquote><p>${parseInline(quoteText)}</p></blockquote>`);
+    } else if (trimmed.startsWith("- ")) {
+      const items = trimmed.split("\n").map((l) => l.replace(/^-\s?/, "")).map((item) => `<li><p>${parseInline(item)}</p></li>`).join("");
+      htmlBlocks.push(`<ul>${items}</ul>`);
+    } else if (/^\d+\.\s/.test(trimmed)) {
+      const items = trimmed.split("\n").map((l) => l.replace(/^\d+\.\s?/, "")).map((item) => `<li><p>${parseInline(item)}</p></li>`).join("");
+      htmlBlocks.push(`<ol>${items}</ol>`);
+    } else if (/^!\[([^\]]*)\]\((\/image\/[^)\s]+)\)$/.test(trimmed)) {
+      const match = trimmed.match(/^!\[([^\]]*)\]\((\/image\/[^)\s]+)\)$/);
+      if (match) {
+        htmlBlocks.push(`<img src="${match[2]}" alt="${escapeHtml(match[1])}" class="prod-rich-inline-image" />`);
+      }
+    } else {
+      const paraText = trimmed.split("\n").join("<br/>");
+      htmlBlocks.push(`<p>${parseInline(paraText)}</p>`);
+    }
+  }
+
+  return htmlBlocks.join("") || "<p></p>";
+}
 
 type ToolbarButtonProps = {
   label: string;
@@ -169,8 +219,8 @@ function editorToMarkdown(editor: HTMLElement) {
     .trim();
 }
 
-export function RichTextEditor({ images, name, onImageUploaded }: RichTextEditorProps) {
-  const [content, setContent] = useState("");
+export function RichTextEditor({ images, name, initialContent, onChange, onImageUploaded }: RichTextEditorProps) {
+  const [content, setContent] = useState(initialContent ?? "");
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
@@ -189,7 +239,7 @@ export function RichTextEditor({ images, name, onImageUploaded }: RichTextEditor
   }, [galleryQuery, images]);
   const editor = useEditor({
     immediatelyRender: false,
-    content: "<p></p>",
+    content: initialContent ? markdownToHtml(initialContent) : "<p></p>",
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
@@ -224,11 +274,22 @@ export function RichTextEditor({ images, name, onImageUploaded }: RichTextEditor
       const markdownRoot = document.createElement("div");
       markdownRoot.innerHTML = activeEditor.getHTML();
       const text = activeEditor.getText().replace(/\n+/g, " ").trim();
-      setContent(editorToMarkdown(markdownRoot));
+      const md = editorToMarkdown(markdownRoot);
+      setContent(md);
+      onChange?.(md);
       setCharacterCount(text.length);
       setWordCount(text ? text.split(/\s+/).length : 0);
     },
   });
+
+  useEffect(() => {
+    if (editor && initialContent !== undefined) {
+      const targetHtml = markdownToHtml(initialContent);
+      if (editor.getHTML() !== targetHtml) {
+        editor.commands.setContent(targetHtml, { emitUpdate: true });
+      }
+    }
+  }, [editor, initialContent]);
 
   const addLink = () => {
     if (!editor || editor.state.selection.empty) {

@@ -1,6 +1,6 @@
 import { callSupabaseRpc } from "./supabase";
 
-export const ARTICLE_STATUSES = ["draft", "published"] as const;
+export const ARTICLE_STATUSES = ["draft", "published", "archived"] as const;
 export type ArticleStatus = (typeof ARTICLE_STATUSES)[number];
 
 export type ArticleImage = {
@@ -38,6 +38,11 @@ export type Article = ArticleSummary & {
   geoSummary: string;
 };
 
+export type FullArticle = Article & {
+  coverImagePath: string;
+  scheduledFor: string | null;
+};
+
 export type NewArticle = {
   title: string;
   slug: string;
@@ -55,6 +60,8 @@ export type NewArticle = {
   publishDate: string;
   scheduledFor: string | null;
 };
+
+export type UpdateArticle = Omit<NewArticle, "authorName">;
 
 export type CreatedArticle = {
   id: number;
@@ -218,3 +225,59 @@ export async function createArticle(article: NewArticle): Promise<CreatedArticle
     p_scheduled_for: article.scheduledFor,
   });
 }
+
+type AdminArticleRow = ArticleRow & {
+  cover_image_path: string;
+  scheduled_for: string | null;
+};
+
+export async function getAdminArticleById(id: number): Promise<FullArticle | null> {
+  const rows = await callSupabaseRpc<AdminArticleRow[]>("hoza_admin_get_article", {
+    p_id: id,
+  });
+  const row = rows[0];
+  if (!row) return null;
+
+  return {
+    ...mapSummary(row),
+    content: row.content,
+    coverImagePath: row.cover_image_path,
+    seoTitle: row.seo_title,
+    seoDescription: row.seo_description,
+    geoSummary: row.geo_summary,
+    scheduledFor: row.scheduled_for,
+  };
+}
+
+export async function updateArticle(id: number, article: UpdateArticle): Promise<CreatedArticle> {
+  return await callSupabaseRpc<CreatedArticle>("hoza_admin_update_article", {
+    p_id: id,
+    p_title: article.title,
+    p_slug: article.slug,
+    p_category: article.category,
+    p_excerpt: article.excerpt,
+    p_content: article.content,
+    p_cover_image_url: article.coverImageUrl,
+    p_cover_image_path: article.coverImagePath,
+    p_cover_image_alt: article.coverImageAlt,
+    p_seo_title: article.seoTitle,
+    p_seo_description: article.seoDescription,
+    p_geo_summary: article.geoSummary,
+    p_status: article.status,
+    p_publish_date: article.publishDate,
+    p_scheduled_for: article.scheduledFor,
+  });
+}
+
+export async function toggleArticleArchive(id: number): Promise<{ id: number; status: ArticleStatus }> {
+  return await callSupabaseRpc<{ id: number; status: ArticleStatus }>("hoza_admin_toggle_article_archive", {
+    p_id: id,
+  });
+}
+
+export async function deleteArticle(id: number): Promise<{ id: number; title: string; slug: string; deleted: boolean }> {
+  return await callSupabaseRpc<{ id: number; title: string; slug: string; deleted: boolean }>("hoza_admin_delete_article", {
+    p_id: id,
+  });
+}
+
