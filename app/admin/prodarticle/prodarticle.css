@@ -465,11 +465,6 @@
   border-color: var(--success);
   background: color-mix(in oklch, var(--success) 18%, transparent);
 }
-.prod-article-btn-delete:hover:not(:disabled) {
-  border-color: var(--error);
-  background: color-mix(in oklch, var(--error) 18%, transparent);
-  color: var(--error);
-}
 .prod-article-btn-view {
   width: 2.5rem;
   height: 2.5rem;
