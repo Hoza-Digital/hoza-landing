@@ -1,7 +1,7 @@
 export type Service = {
   title: string;
   description: string;
-  mode: "browser" | "landing" | "dashboard" | "mobile" | "automation" | "system";
+  mode: "browser" | "landing" | "dashboard" | "mobile" | "automation" | "system" | "press" | "editorial";
 };
 
 export const services: Service[] = [
@@ -34,6 +34,16 @@ export const services: Service[] = [
     title: "Custom Software",
     description: "Purpose-built tools for requirements that off-the-shelf software cannot solve well.",
     mode: "system",
+  },
+  {
+    title: "Press Release",
+    description: "Clear, media-ready announcements for your launches, milestones and company news.",
+    mode: "press",
+  },
+  {
+    title: "Desainer Majalah & Tabloid",
+    description: "Editorial layouts, covers and typography for magazines and tabloids, ready for print and digital readers.",
+    mode: "editorial",
   },
 ];
 

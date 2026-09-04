@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { PortalTransition } from "@/components/portal-transition";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hozadigital.com";
@@ -89,6 +88,8 @@ const jsonLd = {
     "Mobile Application Development",
     "Business Automation",
     "Custom Software Development",
+    "Press Release",
+    "Magazine and Tabloid Design",
   ],
 };
 
@@ -96,7 +97,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${bodyFont.variable} ${displayFont.variable}`}>
-        <PortalTransition />
         {children}
         <script
           type="application/ld+json"

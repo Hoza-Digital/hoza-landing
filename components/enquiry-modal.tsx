@@ -39,7 +39,7 @@ const validateForm = (form: typeof initialForm): FormErrors => {
   return errors;
 };
 
-export function EnquiryModal() {
+export function EnquiryModal({ initiallyOpen = false }: { initiallyOpen?: boolean }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<FormState>("idle");
   const [message, setMessage] = useState("");
@@ -65,8 +65,9 @@ export function EnquiryModal() {
       window.setTimeout(() => firstFieldRef.current?.focus(), 80);
     };
     window.addEventListener("hoza:open-enquiry", openDialog);
+    if (initiallyOpen) openDialog();
     return () => window.removeEventListener("hoza:open-enquiry", openDialog);
-  }, []);
+  }, [initiallyOpen]);
 
   useEffect(() => {
     document.body.classList.toggle("dialog-open", open);
@@ -196,7 +197,7 @@ export function EnquiryModal() {
               <label><span>Email *</span><input name="email" type="email" required maxLength={254} autoComplete="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="name@company.com" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "email-error" : undefined} />{errors.email && <small id="email-error" className="field-error">{errors.email}</small>}</label>
               <label><span>Country *</span><select name="country" required autoComplete="country-name" value={form.country} onChange={(e) => selectCountry(e.target.value)} aria-invalid={Boolean(errors.country)} aria-describedby={errors.country ? "country-error" : undefined}><option value="">Select a country</option>{countries.map((country) => <option key={country.iso2} value={country.name}>{country.name} ({country.dialCode})</option>)}</select>{errors.country && <small id="country-error" className="field-error">{errors.country}</small>}</label>
               <label><span>WhatsApp number</span><input name="whatsapp" type="tel" inputMode="tel" maxLength={40} autoComplete="tel" value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="Select a country for its dialing code" /></label>
-              <label><span>Service required *</span><select name="service" required value={form.service} onChange={(e) => update("service", e.target.value)} aria-invalid={Boolean(errors.service)} aria-describedby={errors.service ? "service-error" : undefined}><option value="">Select a service</option><option>Website</option><option>Landing Page</option><option>Web Application</option><option>Mobile Application</option><option>Automation</option><option>Custom Software</option><option>Not sure yet</option></select>{errors.service && <small id="service-error" className="field-error">{errors.service}</small>}</label>
+              <label><span>Service required *</span><select name="service" required value={form.service} onChange={(e) => update("service", e.target.value)} aria-invalid={Boolean(errors.service)} aria-describedby={errors.service ? "service-error" : undefined}><option value="">Select a service</option><option>Website</option><option>Landing Page</option><option>Web Application</option><option>Mobile Application</option><option>Automation</option><option>Custom Software</option><option>Press Release</option><option>Desainer Majalah &amp; Tabloid</option><option>Not sure yet</option></select>{errors.service && <small id="service-error" className="field-error">{errors.service}</small>}</label>
               <label><span>Estimated budget *</span><select name="budget" required value={form.budget} onChange={(e) => update("budget", e.target.value)} aria-invalid={Boolean(errors.budget)} aria-describedby={errors.budget ? "budget-error" : undefined}><option value="">Select a range</option><option>Under USD 3,000</option><option>USD 3,000–7,500</option><option>USD 7,500–15,000</option><option>USD 15,000–30,000</option><option>USD 30,000+</option><option>Need guidance</option></select>{errors.budget && <small id="budget-error" className="field-error">{errors.budget}</small>}</label>
               <label><span>Preferred launch timeline *</span><select name="timeline" required value={form.timeline} onChange={(e) => update("timeline", e.target.value)} aria-invalid={Boolean(errors.timeline)} aria-describedby={errors.timeline ? "timeline-error" : undefined}><option value="">Select a timeline</option><option>As soon as responsibly possible</option><option>Within 1 month</option><option>1–3 months</option><option>3–6 months</option><option>Flexible / exploring</option></select>{errors.timeline && <small id="timeline-error" className="field-error">{errors.timeline}</small>}</label>
               <label className="form-wide"><span>Project description *</span><textarea name="description" required minLength={20} maxLength={4000} rows={5} value={form.description} onChange={(e) => update("description", e.target.value)} placeholder="What are you building, improving or automating? What should success look like?" aria-invalid={Boolean(errors.description)} aria-describedby={errors.description ? "description-error" : undefined} />{errors.description && <small id="description-error" className="field-error">{errors.description}</small>}</label>

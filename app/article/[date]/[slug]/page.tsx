@@ -10,7 +10,7 @@ import { Footer } from "@/components/footer";
 import { articleContentToPlainText } from "@/lib/article-content";
 import { getPublishedArticle } from "@/lib/articles";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 type ArticlePageProps = {
   params: Promise<{ date: string; slug: string }>;

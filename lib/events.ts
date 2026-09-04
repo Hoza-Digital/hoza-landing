@@ -3,5 +3,8 @@ export const openEnquiry = () => {
 };
 
 export const portalTo = (targetId: string) => {
-  window.dispatchEvent(new CustomEvent("hoza:portal", { detail: { targetId } }));
+  document.getElementById(targetId)?.scrollIntoView({
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+    block: "start",
+  });
 };

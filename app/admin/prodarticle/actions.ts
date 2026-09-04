@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { PUBLIC_ARTICLES_TAG } from "@/lib/article-pagination";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { getAdminSession } from "@/lib/admin-auth";
@@ -128,6 +129,7 @@ export async function publishArticle(
       seoDescription: parsed.data.excerpt.slice(0, 320),
       geoSummary: createGeoSummary(parsed.data.category, parsed.data.excerpt, parsed.data.content),
     });
+    updateTag(PUBLIC_ARTICLES_TAG);
     revalidatePath("/article");
     revalidatePath(result.path);
     revalidatePath("/sitemap.xml");
@@ -244,6 +246,7 @@ export async function updateArticleAction(
       geoSummary: createGeoSummary(parsed.data.category, parsed.data.excerpt, parsed.data.content),
     });
 
+    updateTag(PUBLIC_ARTICLES_TAG);
     revalidatePath("/article");
     revalidatePath(result.path);
     revalidatePath("/sitemap.xml");
@@ -274,6 +277,7 @@ export async function toggleArticleArchiveAction(
 
   try {
     const result = await toggleArticleArchive(id);
+    updateTag(PUBLIC_ARTICLES_TAG);
     revalidatePath("/article");
     revalidatePath("/sitemap.xml");
     revalidatePath("/admin/prodarticle");
@@ -294,6 +298,7 @@ export async function deleteArticleAction(
 
   try {
     const result = await deleteArticle(id);
+    updateTag(PUBLIC_ARTICLES_TAG);
     revalidatePath("/article");
     revalidatePath("/sitemap.xml");
     revalidatePath("/admin/prodarticle");

@@ -3,7 +3,7 @@ import type { Service } from "@/lib/content";
 export function ServiceVisual({ mode, title }: Pick<Service, "mode" | "title">) {
   return (
     <div className={`service-visual mode-${mode}`} aria-label={`${title} interface preview`} role="img">
-      <div className="visual-meta"><span>PREVIEW / ACTIVE</span><span>0.0{["browser", "landing", "dashboard", "mobile", "automation", "system"].indexOf(mode) + 1}</span></div>
+      <div className="visual-meta"><span>PREVIEW / ACTIVE</span><span>0.0{["browser", "landing", "dashboard", "mobile", "automation", "system", "press", "editorial"].indexOf(mode) + 1}</span></div>
       {mode === "browser" && (
         <div className="browser-ui visual-frame">
           <div className="ui-top"><i /><i /><i /><span>hoza.site</span></div>
@@ -49,6 +49,27 @@ export function ServiceVisual({ mode, title }: Pick<Service, "mode" | "title">) 
           <div className="system-module m3"><span>OPS</span><i /></div>
           <div className="system-module m4"><span>API</span><i /></div>
           <div className="system-center">H</div>
+        </div>
+      )}
+      {mode === "press" && (
+        <div className="press-ui visual-frame">
+          <span className="publication-label">HOZA / PRESS OFFICE</span>
+          <span className="press-rule" />
+          <b>YOUR NEXT<br />BIG STORY.</b>
+          <p>Company news.<br />Clearly told.</p>
+          <div className="publication-lines"><i /><i /><i /><i /></div>
+          <span className="publication-footer">PRESS RELEASE / MEDIA READY</span>
+        </div>
+      )}
+      {mode === "editorial" && (
+        <div className="editorial-ui visual-frame">
+          <div className="editorial-cover">
+            <span className="publication-label">HOZA / EDITORIAL DESIGN</span>
+            <b>FRESH<br />PERSPECTIVE.</b>
+            <span className="editorial-art" />
+            <span className="publication-footer">MAGAZINE / TABLOID</span>
+          </div>
+          <div className="editorial-spread"><span>Inside the story</span><div className="publication-lines"><i /><i /><i /><i /><i /><i /></div></div>
         </div>
       )}
       <div className="visual-scan" />

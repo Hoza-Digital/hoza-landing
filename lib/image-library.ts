@@ -49,6 +49,7 @@ async function callImageLibrary(storagePath: string, method: "GET" | "PUT" | "DE
       },
       body: bytes ? Buffer.from(bytes) : undefined,
       cache: "no-store",
+      signal: AbortSignal.timeout(10000),
     },
   );
 }

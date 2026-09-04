@@ -39,10 +39,10 @@ export function Capabilities() {
         <AnimatedHeading as="h2" className="section-title" >
           <span id="capabilities-heading">ONE TEAM.</span><span>MANY POSSIBILITIES.</span>
         </AnimatedHeading>
-        <p className="section-summary">One team from interface to infrastructure. Built around the job, not a fixed package.</p>
+        <p className="section-summary">Digital products, press releases and editorial design. One team, built around the job.</p>
       </div>
       <div className="capabilities-layout">
-        <div className="service-list" role="tablist" aria-label="Hoza capabilities">
+        <div className="service-list" role="tablist" aria-label="Hoza capabilities" aria-orientation="vertical">
           {services.map((service, index) => (
             <button
               key={service.title}

@@ -1,4 +1,5 @@
 import { callSupabaseRpc } from "./supabase";
+import { PUBLIC_ARTICLES_TAG } from "./article-pagination";
 
 export const ARTICLE_STATUSES = ["draft", "published", "archived"] as const;
 export type ArticleStatus = (typeof ARTICLE_STATUSES)[number];
@@ -83,7 +84,7 @@ type ArticleImageRow = {
   created_at: string;
 };
 
-type ArticleSummaryRow = {
+export type ArticleSummaryRow = {
   id: number | string;
   title: string;
   slug: string;
@@ -106,7 +107,7 @@ type ArticleRow = ArticleSummaryRow & {
   geo_summary: string;
 };
 
-function mapSummary(row: ArticleSummaryRow): ArticleSummary {
+export function mapSummary(row: ArticleSummaryRow): ArticleSummary {
   return {
     id: Number(row.id),
     title: row.title,
@@ -144,7 +145,9 @@ export function articlePath(article: Pick<ArticleSummary, "publishDate" | "slug"
 
 export async function listPublishedArticles(): Promise<ArticleSummary[]> {
   try {
-    const rows = await callSupabaseRpc<ArticleSummaryRow[]>("hoza_list_published_articles");
+    const rows = await callSupabaseRpc<ArticleSummaryRow[]>("hoza_list_published_articles", {}, {
+      revalidate: 60, tags: [PUBLIC_ARTICLES_TAG],
+    });
     return rows.map(mapSummary);
   } catch (error) {
     console.error("Failed to list published articles:", error);
@@ -157,7 +160,7 @@ export async function getPublishedArticle(dateCode: string, slug: string): Promi
     const rows = await callSupabaseRpc<ArticleRow[]>("hoza_get_published_article", {
       p_date_code: dateCode,
       p_slug: slug,
-    });
+    }, { revalidate: 60, tags: [PUBLIC_ARTICLES_TAG] });
     const row = rows[0];
     if (!row) return null;
 
@@ -170,7 +173,7 @@ export async function getPublishedArticle(dateCode: string, slug: string): Promi
     };
   } catch (error) {
     console.error("Failed to get published article:", error);
-    return null;
+    throw error;
   }
 }
 
