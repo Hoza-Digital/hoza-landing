@@ -160,8 +160,6 @@
   background: color-mix(in oklch, var(--surface-raised) 92%, transparent);
   transition: border-color .3s, transform .35s var(--ease-out), box-shadow .35s;
 }
-.article-card:nth-child(3n + 2) { border-color: color-mix(in oklch, var(--violet) 42%, var(--line)); }
-.article-card:nth-child(3n) { border-color: color-mix(in oklch, var(--article-pink) 24%, var(--line)); }
 .article-card:hover {
   border-color: var(--article-lime);
   transform: translateY(-7px);
