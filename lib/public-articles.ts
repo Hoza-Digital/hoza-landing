@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
-import { ARTICLES_PER_PAGE, PUBLIC_ARTICLES_TAG, type ArticleBatch } from "./article-pagination";
+import { ARTICLES_PER_BATCH, ARTICLES_PER_PAGE, PUBLIC_ARTICLES_TAG, type ArticleBatch } from "./article-pagination";
 import { mapSummary, type ArticleSummaryRow } from "./articles";
 import { callSupabaseRpc, callSupabaseRpcResult, getSupabaseServerConfig } from "./supabase";
 
@@ -26,7 +26,7 @@ const cachedArticleBatch = unstable_cache(async (source: string, page: number, i
   const { data, count } = await callSupabaseRpcResult<ArticleSummaryRow[]>("hoza_list_published_articles", {}, {
     count: true,
     query: {
-      limit: "1",
+      limit: String(Math.min(ARTICLES_PER_BATCH, ARTICLES_PER_PAGE - index)),
       offset: String((page - 1) * ARTICLES_PER_PAGE + index),
       order: "published_at.desc,id.desc",
       ...(category ? { category: `eq.${category}` } : {}),
@@ -34,7 +34,7 @@ const cachedArticleBatch = unstable_cache(async (source: string, page: number, i
   });
   if (count === null) throw new Error("Article count is unavailable.");
   return { articles: data.map(mapSummary), total: count };
-}, ["article-batch-v1"], publicCache);
+}, ["article-batch-v2"], publicCache);
 
 export const getArticleBatch = cache((page: number, index = 0, category = "") =>
   cachedArticleBatch(getSupabaseServerConfig().url, page, index, category));

@@ -1,6 +1,7 @@
 import type { ArticleSummary } from "./articles";
 
 export const ARTICLES_PER_PAGE = 20;
+export const ARTICLES_PER_BATCH = 3;
 export const PUBLIC_ARTICLES_TAG = "public-articles";
 
 export type ArticleBatch = {

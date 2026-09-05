@@ -48,17 +48,17 @@ export function ArticleFeed({ initialBatch, page, category }: { initialBatch: Ar
       const query = new URLSearchParams({ page: String(page), index: String(nextIndex.current) });
       if (category) query.set("category", category);
       const response = await fetch(`/api/articles?${query}`, { signal: controller.signal });
-      if (!response.ok) throw new Error("Unable to load the next article.");
+      if (!response.ok) throw new Error("Unable to load the next article row.");
       const batch: ArticleBatch = await response.json();
       setTotal(batch.total);
       if (!batch.articles.length) setExhausted(true);
       else {
-        nextIndex.current += 1;
+        nextIndex.current += batch.articles.length;
         setArticles((current) => [...current, ...batch.articles.filter((item) => !current.some((existing) => existing.id === item.id))]);
         if (nextIndex.current >= ARTICLES_PER_PAGE) setExhausted(true);
       }
     } catch {
-      if (request.current === controller) setError("The next article could not be loaded. Your place is saved.");
+      if (request.current === controller) setError("The next article row could not be loaded. Your place is saved.");
     } finally {
       window.clearTimeout(timeout);
       if (request.current === controller) { request.current = null; setLoading(false); }
@@ -82,8 +82,8 @@ export function ArticleFeed({ initialBatch, page, category }: { initialBatch: Ar
       </div>
       {canLoad && <div ref={sentinel} className="article-load-more">
         {error && <p role="alert">{error}</p>}
-        <button type="button" onClick={() => void loadNext()} disabled={loading}>{loading ? <><Loader2 className="spin" aria-hidden="true" /> Loading next article…</> : error ? "Try again" : "Load next article"}</button>
-        <p>Articles load one at a time as you scroll. Up to 20 per page.</p>
+        <button type="button" onClick={() => void loadNext()} disabled={loading}>{loading ? <><Loader2 className="spin" aria-hidden="true" /> Loading next row…</> : error ? "Try again" : "Load next row"}</button>
+        <p>Articles load one row at a time as you scroll. Up to 20 per page.</p>
       </div>}
       {!canLoad && pageCount > 1 && <nav className="article-pagination" aria-label="Article pagination">
         {page > 1 && <Link href={articleListHref(page - 1, category)}>Previous page</Link>}
@@ -91,7 +91,7 @@ export function ArticleFeed({ initialBatch, page, category }: { initialBatch: Ar
         {page < pageCount && <Link href={articleListHref(page + 1, category)}>Next page <ArrowUpRight aria-hidden="true" /></Link>}
       </nav>}
       {!canLoad && total > 0 && page >= pageCount && <p className="article-end">You’re all caught up.</p>}
-      <noscript><p>Enable JavaScript to load articles one at a time.</p></noscript>
+      <noscript><p>Enable JavaScript to load additional article rows.</p></noscript>
     </section>
   );
 }
