@@ -41,7 +41,7 @@ export const services: Service[] = [
     mode: "press",
   },
   {
-    title: "Desainer Majalah & Tabloid",
+    title: "Magazine & Tabloid Design",
     description: "Editorial layouts, covers and typography for magazines and tabloids, ready for print and digital readers.",
     mode: "editorial",
   },
