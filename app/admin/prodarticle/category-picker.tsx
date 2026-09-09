@@ -3,9 +3,10 @@
 import { useMemo, useState, type KeyboardEvent } from "react";
 import { Check, Plus, Tag, X } from "lucide-react";
 
+import { normalizeCategoryName } from "@/lib/articles";
+
 export const PRESET_CATEGORIES = [
   "Sales",
-  "Web Design",
   "Web",
   "App",
   "Product Strategy",
@@ -30,26 +31,16 @@ export function CategoryPicker({
   const [customInput, setCustomInput] = useState("");
 
   const selectedList = useMemo(() => {
-    return (value ?? "")
+    const normalized = normalizeCategoryName(value ?? "");
+    return normalized
       .split(",")
       .map((cat) => cat.trim())
       .filter(Boolean);
   }, [value]);
 
   const updateCategories = (newList: string[]) => {
-    // Deduplicate case-insensitively while preserving original casing
-    const unique: string[] = [];
-    const seen = new Set<string>();
-
-    for (const item of newList) {
-      const trimmed = item.trim();
-      if (trimmed && !seen.has(trimmed.toLowerCase())) {
-        seen.add(trimmed.toLowerCase());
-        unique.push(trimmed);
-      }
-    }
-
-    const formatted = unique.join(", ");
+    const raw = newList.join(", ");
+    const formatted = normalizeCategoryName(raw);
     onChange?.(formatted);
   };
 

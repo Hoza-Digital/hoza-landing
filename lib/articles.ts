@@ -107,12 +107,30 @@ type ArticleRow = ArticleSummaryRow & {
   geo_summary: string;
 };
 
+export function normalizeCategoryName(rawCategory: string): string {
+  if (!rawCategory) return "";
+  const parts = rawCategory.split(",").map((s) => s.trim()).filter(Boolean);
+  const mapped = parts.map((cat) => {
+    if (cat.toLowerCase() === "web design") return "Web";
+    return cat;
+  });
+  const unique: string[] = [];
+  const seen = new Set<string>();
+  for (const item of mapped) {
+    if (!seen.has(item.toLowerCase())) {
+      seen.add(item.toLowerCase());
+      unique.push(item);
+    }
+  }
+  return unique.join(", ");
+}
+
 export function mapSummary(row: ArticleSummaryRow): ArticleSummary {
   return {
     id: Number(row.id),
     title: row.title,
     slug: row.slug,
-    category: row.category,
+    category: normalizeCategoryName(row.category),
     excerpt: row.excerpt,
     coverImageUrl: row.cover_image_url,
     coverImageAlt: row.cover_image_alt,

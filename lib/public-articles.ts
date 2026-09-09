@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { ARTICLES_PER_BATCH, ARTICLES_PER_PAGE, PUBLIC_ARTICLES_TAG, type ArticleBatch } from "./article-pagination";
-import { mapSummary, type ArticleSummaryRow } from "./articles";
+import { mapSummary, normalizeCategoryName, type ArticleSummaryRow } from "./articles";
 import { callSupabaseRpc, callSupabaseRpcResult, getSupabaseServerConfig } from "./supabase";
 
 const publicCache = { revalidate: 60, tags: [PUBLIC_ARTICLES_TAG] };
@@ -15,7 +15,7 @@ export const listArticleCategories = cache(async (): Promise<string[]> => {
     query: { select: "category", order: "category.asc" },
   });
   const allCategories = rows.flatMap((row) =>
-    (row.category ?? "").split(",").map((cat) => cat.trim()).filter(Boolean)
+    normalizeCategoryName(row.category ?? "").split(",").map((cat) => cat.trim()).filter(Boolean)
   );
   return [...new Set(allCategories)].sort((a, b) => a.localeCompare(b));
 });

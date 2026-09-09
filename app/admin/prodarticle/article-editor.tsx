@@ -108,7 +108,7 @@ export function ArticleEditor({
   const [title, setTitle] = useState("");
   const [editSlug, setEditSlug] = useState(false);
   const [customSlug, setCustomSlug] = useState("");
-  const [category, setCategory] = useState("Web Design");
+  const [category, setCategory] = useState("Web");
   const [coverAlt, setCoverAlt] = useState(initialImages[0]?.altText ?? "");
   const [coverAltCustomized, setCoverAltCustomized] = useState(Boolean(initialImages[0]));
   const [workflow, setWorkflow] = useState<ArticleStatus>("published");
