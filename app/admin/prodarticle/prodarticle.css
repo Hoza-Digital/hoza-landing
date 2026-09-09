@@ -663,3 +663,131 @@
   .prod-article-btn { transition: none; }
 }
 
+/* Multi-Category Picker Styles */
+.category-picker-container {
+  display: grid;
+  gap: .75rem;
+}
+
+.category-selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.category-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .35rem .65rem;
+  border: 1px solid var(--violet);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--violet) 16%, var(--surface-strong));
+  color: var(--lavender);
+  font-size: .68rem;
+  font-weight: 600;
+}
+
+.category-tag-badge svg {
+  width: .75rem;
+  height: .75rem;
+}
+
+.category-tag-badge button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: color 140ms ease;
+}
+
+.category-tag-badge button:hover {
+  color: var(--error);
+}
+
+.category-preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .4rem .75rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--text-secondary);
+  font-size: .66rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.category-chip:hover {
+  border-color: var(--line-strong);
+  background: var(--accent-wash);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.category-chip.is-selected {
+  border-color: var(--success);
+  background: color-mix(in oklch, var(--success) 14%, var(--surface-strong));
+  color: color-mix(in oklch, var(--success) 90%, var(--text));
+  font-weight: 650;
+}
+
+.category-chip svg {
+  width: .75rem;
+  height: .75rem;
+}
+
+.category-custom-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+
+.category-custom-input-wrap input {
+  flex: 1;
+  min-height: 2.8rem;
+  padding: .6rem .85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-strong);
+  color: var(--text);
+  font-size: .72rem;
+}
+
+.category-custom-input-wrap input:focus {
+  border-color: var(--violet);
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--accent-wash);
+}
+
+.category-add-btn {
+  min-height: 2.8rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--accent-wash);
+  color: var(--text);
+  font-size: .65rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.category-picker-help {
+  color: var(--muted);
+  font-size: .56rem;
+}
+
+

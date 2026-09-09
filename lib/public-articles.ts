@@ -14,7 +14,10 @@ export const listArticleCategories = cache(async (): Promise<string[]> => {
     ...publicCache,
     query: { select: "category", order: "category.asc" },
   });
-  return [...new Set(rows.map((row) => row.category))];
+  const allCategories = rows.flatMap((row) =>
+    (row.category ?? "").split(",").map((cat) => cat.trim()).filter(Boolean)
+  );
+  return [...new Set(allCategories)].sort((a, b) => a.localeCompare(b));
 });
 
 const cachedArticleBatch = unstable_cache(async (source: string, page: number, index: number, category: string): Promise<ArticleBatch> => {
@@ -29,12 +32,12 @@ const cachedArticleBatch = unstable_cache(async (source: string, page: number, i
       limit: String(Math.min(ARTICLES_PER_BATCH, ARTICLES_PER_PAGE - index)),
       offset: String((page - 1) * ARTICLES_PER_PAGE + index),
       order: "published_at.desc,id.desc",
-      ...(category ? { category: `eq.${category}` } : {}),
+      ...(category ? { category: `ilike.%${category}%` } : {}),
     },
   });
   if (count === null) throw new Error("Article count is unavailable.");
   return { articles: data.map(mapSummary), total: count };
-}, ["article-batch-v2"], publicCache);
+}, ["article-batch-v3"], publicCache);
 
 export const getArticleBatch = cache((page: number, index = 0, category = "") =>
   cachedArticleBatch(getSupabaseServerConfig().url, page, index, category));

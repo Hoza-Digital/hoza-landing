@@ -29,6 +29,7 @@ import {
   uploadArticleImage,
 } from "./image-processing";
 import { RichTextEditor } from "./rich-text-editor";
+import { CategoryPicker } from "./category-picker";
 
 type EditArticleModalProps = {
   articleId: number;
@@ -478,26 +479,10 @@ export function EditArticleModal({
                 </div>
               )}
 
-              <label className="prod-field">
-                <span>Category *</span>
-                <input
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  required
-                  minLength={2}
-                  maxLength={80}
-                  list="edit-article-categories"
-                  placeholder="Web Design"
-                />
-                <datalist id="edit-article-categories">
-                  <option value="Web Design" />
-                  <option value="Product Strategy" />
-                  <option value="Automation" />
-                  <option value="Technology" />
-                  <option value="Business Growth" />
-                  <option value="Sales" />
-                </datalist>
-              </label>
+              <div className="prod-field prod-field-wide">
+                <span>Category / Tags *</span>
+                <CategoryPicker value={category} onChange={setCategory} name="category" />
+              </div>
 
               <label className="prod-field">
                 <span>Author</span>

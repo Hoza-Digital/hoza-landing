@@ -31,6 +31,7 @@ import {
   toggleArticleArchiveAction,
 } from "./actions";
 import { EditArticleModal } from "./edit-article-modal";
+import { CategoryPicker } from "./category-picker";
 import {
   type CompressedImage,
   MAX_IMAGE_BYTES,
@@ -107,6 +108,7 @@ export function ArticleEditor({
   const [title, setTitle] = useState("");
   const [editSlug, setEditSlug] = useState(false);
   const [customSlug, setCustomSlug] = useState("");
+  const [category, setCategory] = useState("Web Design");
   const [coverAlt, setCoverAlt] = useState(initialImages[0]?.altText ?? "");
   const [coverAltCustomized, setCoverAltCustomized] = useState(Boolean(initialImages[0]));
   const [workflow, setWorkflow] = useState<ArticleStatus>("published");
@@ -381,17 +383,10 @@ export function ArticleEditor({
                 <ArrowUpRight aria-hidden="true" />
               </button>
             </div>
-            <label className="prod-field">
-              <span>Category *</span>
-              <input name="category" required minLength={2} maxLength={80} list="article-categories" placeholder="Product strategy" />
-              <datalist id="article-categories">
-                <option value="Web Design" />
-                <option value="Product Strategy" />
-                <option value="Automation" />
-                <option value="Technology" />
-                <option value="Business Growth" />
-              </datalist>
-            </label>
+            <div className="prod-field prod-field-wide">
+              <span>Category / Tags *</span>
+              <CategoryPicker value={category} onChange={setCategory} name="category" />
+            </div>
             <label className="prod-field">
               <span>Author *</span>
               <input
