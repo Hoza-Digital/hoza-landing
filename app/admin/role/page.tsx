@@ -26,7 +26,7 @@ const ROLE_CARDS: RoleCardInfo[] = [
   {
     role: "super_admin",
     title: ADMIN_ROLE_LABELS.super_admin,
-    scopeSummary: "Akses penuh (Full system & user control)",
+    scopeSummary: "Full access (Full system & user control)",
     description:
       "Super Administrators hold complete, unrestricted control over system configuration, user accounts, role modifications, project signals, and article production.",
     icon: Crown,
@@ -34,7 +34,7 @@ const ROLE_CARDS: RoleCardInfo[] = [
   {
     role: "admin",
     title: ADMIN_ROLE_LABELS.admin,
-    scopeSummary: "Dapat mengelola user marketing/writer & project signal",
+    scopeSummary: "Can manage marketing & writer users and project signals",
     description:
       "Administrators manage team user accounts (Marketing & Writer roles), inspect incoming project signals, and oversee article publishing workflows.",
     icon: ShieldCheck,
@@ -42,7 +42,7 @@ const ROLE_CARDS: RoleCardInfo[] = [
   {
     role: "marketing",
     title: ADMIN_ROLE_LABELS.marketing,
-    scopeSummary: "Akses ke project signal & enquiry",
+    scopeSummary: "Access to project signals and enquiries",
     description:
       "Marketing specialists focus on client lead discovery, reviewing incoming project signals, and monitoring customer enquiry responses.",
     icon: FolderKanban,
@@ -50,7 +50,7 @@ const ROLE_CARDS: RoleCardInfo[] = [
   {
     role: "writer",
     title: ADMIN_ROLE_LABELS.writer,
-    scopeSummary: "Akses ke produksi artikel",
+    scopeSummary: "Access to article production",
     description:
       "Content Writers focus exclusively on creating, editing, scheduling, and publishing articles within the Content Library.",
     icon: FilePlus2,
@@ -173,7 +173,7 @@ export default async function RoleManagementPage() {
                 <h3 className="role-card-title">{item.title}</h3>
                 <p className="role-card-desc">{item.description}</p>
                 <div className="role-card-access">
-                  <span>Hak Akses Utama</span>
+                  <span>Primary Scope</span>
                   <p>{item.scopeSummary}</p>
                 </div>
               </article>
