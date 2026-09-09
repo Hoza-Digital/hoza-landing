@@ -202,11 +202,15 @@
   background: color-mix(in oklch, var(--surface-raised) 94%, transparent);
 }
 
-.role-matrix-section > header {
-  margin-bottom: 2rem;
+.role-matrix-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.role-matrix-section > header p {
+.role-matrix-header p {
   margin: 0 0 .35rem;
   color: var(--violet);
   font-size: .54rem;
@@ -214,11 +218,99 @@
   text-transform: uppercase;
 }
 
-.role-matrix-section > header h2 {
+.role-matrix-header h2 {
   margin: 0;
   font-family: var(--font-display), sans-serif;
   font-size: clamp(2rem, 4vw, 2.8rem);
   line-height: .9;
+}
+
+.role-matrix-super-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .45rem .85rem;
+  border: 1px solid color-mix(in oklch, var(--violet) 60%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--violet) 12%, transparent);
+  color: var(--lavender);
+  font-size: .6rem;
+  font-weight: 650;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.role-matrix-super-badge svg {
+  width: .85rem;
+  height: .85rem;
+  color: var(--violet);
+}
+
+.role-matrix-banner {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  gap: .85rem;
+  align-items: center;
+  margin-bottom: 1.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid color-mix(in oklch, var(--violet) 40%, var(--line));
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--violet) 8%, var(--surface-quiet));
+  color: var(--text-secondary);
+}
+
+.role-matrix-banner svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--violet);
+}
+
+.role-matrix-banner strong {
+  display: block;
+  color: var(--text);
+  font-size: .78rem;
+  margin-bottom: .2rem;
+}
+
+.role-matrix-banner p {
+  margin: 0;
+  font-size: .7rem;
+  line-height: 1.45;
+}
+
+.role-matrix-banner em {
+  color: var(--lavender);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.role-matrix-toast {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin-bottom: 1.5rem;
+  padding: .85rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: .72rem;
+}
+
+.role-matrix-toast.is-success {
+  border-color: color-mix(in oklch, var(--success) 50%, var(--line));
+  background: color-mix(in oklch, var(--success) 10%, transparent);
+  color: var(--success);
+}
+
+.role-matrix-toast.is-error {
+  border-color: color-mix(in oklch, var(--error) 50%, var(--line));
+  background: color-mix(in oklch, var(--error) 10%, transparent);
+  color: var(--error);
+}
+
+.role-matrix-toast svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
 }
 
 .role-matrix-table-wrap {
@@ -266,6 +358,68 @@
   font-size: .65rem;
 }
 
+.role-matrix-cell.is-locked {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.role-matrix-cell.is-locked small {
+  color: var(--muted);
+  font-size: .52rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* Interactive Toggle Buttons */
+.role-toggle-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .2rem;
+  padding: .5rem .75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-quiet);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+  width: 100%;
+  max-width: 8.5rem;
+}
+
+.role-toggle-btn.is-allowed {
+  border-color: color-mix(in oklch, var(--success) 40%, var(--line));
+  background: color-mix(in oklch, var(--success) 8%, var(--surface-quiet));
+}
+
+.role-toggle-btn.is-none {
+  border-color: var(--line);
+  background: var(--surface-quiet);
+  opacity: .75;
+}
+
+.role-toggle-btn:hover {
+  transform: translateY(-1px);
+  border-color: var(--violet);
+  opacity: 1;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+.role-toggle-hint {
+  color: var(--muted);
+  font-size: .5rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.role-toggle-btn:hover .role-toggle-hint {
+  opacity: 1;
+  color: var(--violet);
+}
+
 .role-check {
   display: inline-flex;
   align-items: center;
@@ -286,7 +440,7 @@
   gap: .4rem;
   color: var(--muted);
   font-size: .72rem;
-  opacity: .5;
+  opacity: .7;
 }
 
 .role-cross svg {
@@ -294,10 +448,104 @@
   height: .9rem;
 }
 
+/* Actions Footer */
+.role-matrix-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.role-dirty-badge {
+  color: #f59e0b;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+}
+
+.role-clean-badge {
+  color: var(--muted);
+  font-size: .68rem;
+}
+
+.role-matrix-buttons {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+}
+
+.role-reset-btn,
+.role-save-btn {
+  min-height: 2.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  padding-inline: 1.2rem;
+  border-radius: var(--radius-sm);
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+.role-reset-btn {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.role-reset-btn:hover:not(:disabled) {
+  border-color: var(--violet);
+  background: var(--accent-wash);
+  color: var(--text);
+}
+
+.role-save-btn {
+  border: 0;
+  background: var(--action);
+  color: var(--bg);
+}
+
+.role-save-btn:hover:not(:disabled) {
+  opacity: .9;
+}
+
+.role-save-btn:disabled,
+.role-reset-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.role-reset-btn svg,
+.role-save-btn svg {
+  width: .85rem;
+  height: .85rem;
+}
+
 @media (max-width: 900px) {
   .role-management-hero {
     grid-template-columns: 1fr;
     min-height: auto;
     padding-block: 6rem 3rem;
+  }
+
+  .role-matrix-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .role-matrix-buttons {
+    flex-direction: column;
+  }
+
+  .role-reset-btn,
+  .role-save-btn {
+    width: 100%;
   }
 }

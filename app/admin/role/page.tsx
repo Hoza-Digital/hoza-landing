@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 import {
-  Check,
   Crown,
   FilePlus2,
   FolderKanban,
   ShieldCheck,
-  X,
 } from "lucide-react";
 import { AdminTopbar } from "@/app/admin/admin-topbar";
 import { getAdminSession } from "@/lib/admin-auth";
 import { ADMIN_ROLE_LABELS, type AdminRole } from "@/lib/admin-users";
+import { getRolePermissionsMatrix } from "@/lib/role-permissions";
+import { PermissionsMatrix } from "./permissions-matrix";
 import "./role.css";
 
 export const dynamic = "force-dynamic";
@@ -57,77 +57,12 @@ const ROLE_CARDS: RoleCardInfo[] = [
   },
 ];
 
-type MatrixRow = {
-  feature: string;
-  description: string;
-  superAdmin: boolean;
-  admin: boolean;
-  marketing: boolean;
-  writer: boolean;
-};
-
-const MATRIX_ROWS: MatrixRow[] = [
-  {
-    feature: "Control Centre Dashboard (/admin)",
-    description: "Access system overview and overall statistics",
-    superAdmin: true,
-    admin: true,
-    marketing: true,
-    writer: true,
-  },
-  {
-    feature: "Project Signals (/admin/projectsignal)",
-    description: "View and manage incoming project enquiry signals",
-    superAdmin: true,
-    admin: true,
-    marketing: true,
-    writer: false,
-  },
-  {
-    feature: "Produce Article (/admin/prodarticle)",
-    description: "Create, edit, schedule, and archive website articles",
-    superAdmin: true,
-    admin: true,
-    marketing: false,
-    writer: true,
-  },
-  {
-    feature: "User Management (/admin/user)",
-    description: "View active user directory and profiles",
-    superAdmin: true,
-    admin: true,
-    marketing: true,
-    writer: true,
-  },
-  {
-    feature: "Provision New Users",
-    description: "Add new accounts for team members",
-    superAdmin: true,
-    admin: true, // Only marketing & writer
-    marketing: false,
-    writer: false,
-  },
-  {
-    feature: "Manage Roles & Delete Users",
-    description: "Update user permissions or remove access",
-    superAdmin: true,
-    admin: true, // Limited to marketing & writer
-    marketing: false,
-    writer: false,
-  },
-  {
-    feature: "Super Admin Privileges",
-    description: "Manage Super Admin users and root system settings",
-    superAdmin: true,
-    admin: false,
-    marketing: false,
-    writer: false,
-  },
-];
-
 export default async function RoleManagementPage() {
   const admin = await getAdminSession();
   if (!admin) redirect("/admlog");
+
+  const matrixRows = await getRolePermissionsMatrix();
+  const isSuperAdmin = admin.role === "super_admin";
 
   return (
     <main className="admin-dashboard role-management-page">
@@ -182,66 +117,7 @@ export default async function RoleManagementPage() {
         </div>
       </section>
 
-      <section className="role-matrix-section">
-        <header>
-          <p>Detailed matrix</p>
-          <h2>PERMISSIONS MATRIX.</h2>
-        </header>
-
-        <div className="role-matrix-table-wrap">
-          <table className="role-matrix-table">
-            <thead>
-              <tr>
-                <th>Feature / Capability</th>
-                <th>Super Admin</th>
-                <th>Admin</th>
-                <th>Marketing</th>
-                <th>Content Writer</th>
-              </tr>
-            </thead>
-            <tbody>
-              {MATRIX_ROWS.map((row) => (
-                <tr key={row.feature}>
-                  <td>
-                    <div className="role-matrix-feature">
-                      <strong>{row.feature}</strong>
-                      <span>{row.description}</span>
-                    </div>
-                  </td>
-                  <td>
-                    {row.superAdmin ? (
-                      <span className="role-check"><Check aria-hidden="true" /> Full</span>
-                    ) : (
-                      <span className="role-cross"><X aria-hidden="true" /> None</span>
-                    )}
-                  </td>
-                  <td>
-                    {row.admin ? (
-                      <span className="role-check"><Check aria-hidden="true" /> Allowed</span>
-                    ) : (
-                      <span className="role-cross"><X aria-hidden="true" /> None</span>
-                    )}
-                  </td>
-                  <td>
-                    {row.marketing ? (
-                      <span className="role-check"><Check aria-hidden="true" /> Allowed</span>
-                    ) : (
-                      <span className="role-cross"><X aria-hidden="true" /> None</span>
-                    )}
-                  </td>
-                  <td>
-                    {row.writer ? (
-                      <span className="role-check"><Check aria-hidden="true" /> Allowed</span>
-                    ) : (
-                      <span className="role-cross"><X aria-hidden="true" /> None</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <PermissionsMatrix isSuperAdmin={isSuperAdmin} initialRows={matrixRows} />
     </main>
   );
 }
