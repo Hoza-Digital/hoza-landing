@@ -1,0 +1,303 @@
+.role-management-page {
+  padding-bottom: 8rem;
+}
+
+.role-management-hero {
+  min-height: 24rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: 3rem;
+  align-items: end;
+  padding-block: 7rem 3.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.role-management-hero .eyebrow {
+  margin-bottom: 1.3rem;
+  text-transform: none;
+}
+
+.role-management-hero h1 {
+  margin: 0;
+  font-size: clamp(4rem, 8vw, 8.5rem);
+  line-height: .84;
+  letter-spacing: -.045em;
+}
+
+.role-management-hero h1 em {
+  color: var(--lavender);
+  font-style: normal;
+}
+
+.role-viewer-card {
+  padding: 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-quiet);
+  backdrop-filter: blur(12px);
+}
+
+.role-viewer-card > span {
+  color: var(--violet);
+  font-size: .55rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.role-viewer-card strong {
+  display: block;
+  margin-top: 1.8rem;
+  font-size: 1.15rem;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: .4rem;
+  padding: .3rem .6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--accent-wash);
+  color: var(--lavender);
+  font-size: .62rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+}
+
+.role-badge.super_admin {
+  border-color: color-mix(in oklch, var(--violet) 60%, var(--line));
+  color: var(--lavender);
+}
+
+.role-badge.admin {
+  border-color: color-mix(in oklch, var(--success) 50%, var(--line));
+  color: color-mix(in oklch, var(--success) 90%, var(--text));
+}
+
+.role-badge.marketing {
+  border-color: color-mix(in oklch, #38bdf8 50%, var(--line));
+  color: #38bdf8;
+}
+
+.role-badge.writer {
+  border-color: color-mix(in oklch, #f59e0b 50%, var(--line));
+  color: #f59e0b;
+}
+
+/* Cards Grid */
+.role-cards-section {
+  padding-top: 3.5rem;
+}
+
+.role-cards-section > header {
+  margin-bottom: 2rem;
+}
+
+.role-cards-section > header p {
+  margin: 0 0 .35rem;
+  color: var(--violet);
+  font-size: .54rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.role-cards-section > header h2 {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+  line-height: .9;
+}
+
+.role-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1.25rem;
+}
+
+.role-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--surface-raised) 94%, transparent);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.role-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--line-strong);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.4);
+}
+
+.role-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.role-card-icon {
+  width: 2.8rem;
+  height: 2.8rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface-strong);
+  color: var(--violet);
+}
+
+.role-card-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.role-card-title {
+  margin: 0 0 .5rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: -.02em;
+}
+
+.role-card-desc {
+  margin: 0 0 1.5rem;
+  color: var(--text-secondary);
+  font-size: .78rem;
+  line-height: 1.55;
+  flex: 1 1 auto;
+}
+
+.role-card-access {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-quiet);
+}
+
+.role-card-access span {
+  display: block;
+  margin-bottom: .4rem;
+  color: var(--violet);
+  font-size: .52rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.role-card-access p {
+  margin: 0;
+  color: var(--text);
+  font-size: .72rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/* Permissions Matrix */
+.role-matrix-section {
+  margin-top: 4rem;
+  padding: 2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--surface-raised) 94%, transparent);
+}
+
+.role-matrix-section > header {
+  margin-bottom: 2rem;
+}
+
+.role-matrix-section > header p {
+  margin: 0 0 .35rem;
+  color: var(--violet);
+  font-size: .54rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.role-matrix-section > header h2 {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: .9;
+}
+
+.role-matrix-table-wrap {
+  overflow-x: auto;
+}
+
+.role-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: .75rem;
+}
+
+.role-matrix-table th,
+.role-matrix-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.role-matrix-table th {
+  color: var(--muted);
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  background: var(--surface-strong);
+}
+
+.role-matrix-table tbody tr:hover {
+  background: color-mix(in oklch, var(--surface-strong) 50%, transparent);
+}
+
+.role-matrix-feature {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+.role-matrix-feature strong {
+  color: var(--text);
+  font-size: .8rem;
+}
+
+.role-matrix-feature span {
+  color: var(--muted);
+  font-size: .65rem;
+}
+
+.role-check {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--success);
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.role-check svg {
+  width: .9rem;
+  height: .9rem;
+}
+
+.role-cross {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--muted);
+  font-size: .72rem;
+  opacity: .5;
+}
+
+.role-cross svg {
+  width: .9rem;
+  height: .9rem;
+}
+
+@media (max-width: 900px) {
+  .role-management-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding-block: 6rem 3rem;
+  }
+}

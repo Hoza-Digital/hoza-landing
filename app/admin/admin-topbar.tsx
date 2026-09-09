@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FilePlus2, FolderKanban, LayoutDashboard, LogOut, Menu, Users } from "lucide-react";
+import { FilePlus2, FolderKanban, LayoutDashboard, LogOut, Menu, ShieldCheck, Users } from "lucide-react";
 import { Logo } from "@/components/logo";
 import {
   ADMIN_ROLE_LABELS,
@@ -45,6 +45,10 @@ export function AdminTopbar({ user }: { user: AdminIdentity }) {
             <Link href="/admin/user">
               <Users aria-hidden="true" />
               User management
+            </Link>
+            <Link href="/admin/role">
+              <ShieldCheck aria-hidden="true" />
+              Role management
             </Link>
           </nav>
           <form action={logoutAdmin}>
