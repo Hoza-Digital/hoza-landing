@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Facebook, Instagram, Link2, MessageCircle, Send } from "lucide-react";
+import { Check, Facebook, Link2, MessageCircle, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type ArticleShareProps = {
@@ -33,18 +33,6 @@ export function ArticleShare({ title, url }: ArticleShareProps) {
     }
   };
 
-  const shareToInstagram = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title, text: title, url });
-        return;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-      }
-    }
-    await copyLink("Link copied for Instagram");
-  };
-
   return (
     <div className="article-share">
       <span>SHARE URL</span>
@@ -52,9 +40,6 @@ export function ArticleShare({ title, url }: ArticleShareProps) {
         <a href={`https://x.com/intent/post?url=${encodedUrl}&text=${encodedTitle}`} target="_blank" rel="noreferrer noopener" aria-label="Share on X" title="Share on X">
           <span className="social-x-mark" aria-hidden="true" />
         </a>
-        <button type="button" onClick={shareToInstagram} aria-label="Share on Instagram" title="Share on Instagram">
-          <Instagram aria-hidden="true" />
-        </button>
         <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noreferrer noopener" aria-label="Share on Facebook" title="Share on Facebook">
           <Facebook aria-hidden="true" />
         </a>
